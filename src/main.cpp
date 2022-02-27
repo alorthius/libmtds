@@ -4,15 +4,25 @@
 #include <iostream>
 #include "queue.hpp"
 
-int main(int argc, char *argv[]) {
-    queue_t queue;
-    queue.enqueue(1);
-    queue.enqueue(2);
-    std::cout << queue.dequeue() << std::endl;
-    std::cout << queue.dequeue() << std::endl;
-    queue.enqueue(3);
-    queue.enqueue(4);
-    std::cout << queue.dequeue() << std::endl;
-    std::cout << queue.dequeue() << std::endl;
+int main() {
+    queue_t<int> queue_int;
+    queue_int.enqueue(1);
+    queue_int.enqueue(2);
+    std::cout << queue_int.dequeue() << std::endl;
+    std::cout << queue_int.dequeue() << std::endl;
+    queue_int.enqueue(3);
+    queue_int.enqueue(4);
+    std::cout << queue_int.dequeue() << std::endl;
+    std::cout << queue_int.dequeue() << std::endl;
+
+    queue_t<std::string> queue_string;
+    queue_string.enqueue("one");
+    queue_string.enqueue("two");
+    std::cout << queue_string.dequeue() << std::endl;
+    std::cout << queue_string.dequeue() << std::endl;
+    queue_string.enqueue("three");
+    queue_string.enqueue("four");
+    std::cout << queue_string.dequeue() << std::endl;
+    std::cout << queue_string.dequeue() << std::endl;
     return 0;
 }
