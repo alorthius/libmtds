@@ -4,29 +4,41 @@
 #include <mutex>
 
 template<typename T>
-struct node_t {
+struct Node {
     T value;
-    node_t* next;
+    Node* next;
 };
 
 template<typename T>
-class queue_t {
+class Queue {
 public:
-    queue_t() = default;
-    void enqueue(T value);
-    T dequeue();
+    Queue() = default;
+    ~Queue();
+    void enqueue(const T& value);
+    T* dequeue();
+    [[nodiscard]] size_t size() const { return size_m; };
+
 private:
     std::mutex mutex;
-
-private:
-    node_t<T>* head = nullptr;
-    node_t<T>* tail = nullptr;
+    Node<T>* head = nullptr;
+    Node<T>* tail = nullptr;
+    size_t size_m = 0;
 };
 
 template<typename T>
-void queue_t<T>::enqueue(T value) {
+Queue<T>::~Queue() {
+    while (head) {
+        Node<T>* temp = head;
+        head = head->next;
+        delete temp;
+    }
+}
+
+template<typename T>
+void Queue<T>::enqueue(const T& value) {
     mutex.lock();
-    auto *temp = new node_t<T>{value, nullptr};
+    ++size_m;
+    auto* temp = new Node<T>{value, nullptr};
     if (!head) {
         head = tail = temp;
     } else {
@@ -37,14 +49,19 @@ void queue_t<T>::enqueue(T value) {
 }
 
 template<typename T>
-T queue_t<T>::dequeue() {
+T* Queue<T>::dequeue() {
     mutex.lock();
-    T value = head->value;
-    node_t<T>* temp = head;
+    if (size_m == 0) {
+        mutex.unlock();
+        return nullptr;
+    }
+    --size_m;
+    auto* value_ptr = new T(head->value);
+    Node<T>* temp = head;
     head = head->next;
     delete temp;
     mutex.unlock();
-    return value;
+    return value_ptr;
 }
 
 #endif //MY_QUEUE_QUEUE_HPP
