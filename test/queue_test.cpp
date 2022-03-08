@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include <gtest/gtest.h>
 #include <thread>
 #include "queue.hpp"
@@ -19,17 +22,16 @@ TEST_F(QueueTest, IsEmptyInitially) {
 }
 
 TEST_F(QueueTest, TryDequeueWorks) {
-    int* value_ptr = static_cast<int*>(::operator new(sizeof(int)));
-    EXPECT_FALSE(q0.try_dequeue(value_ptr));
+    int value;
+    EXPECT_FALSE(q0.try_dequeue(&value));
 
-    ASSERT_TRUE(q1.try_dequeue(value_ptr));
-    EXPECT_EQ(*value_ptr, 1);
+    ASSERT_TRUE(q1.try_dequeue(&value));
+    EXPECT_EQ(value, 1);
     EXPECT_EQ(q1.size(), 0);
 
-    ASSERT_TRUE(q2.try_dequeue(value_ptr));
-    EXPECT_EQ(*value_ptr, 2);
+    ASSERT_TRUE(q2.try_dequeue(&value));
+    EXPECT_EQ(value, 2);
     EXPECT_EQ(q2.size(), 1);
-    delete value_ptr;
 }
 
 void enqueue_test(Queue<int>& queue) {
@@ -40,10 +42,9 @@ void enqueue_test(Queue<int>& queue) {
 
 void try_dequeue_test(Queue<int>& queue) {
     for (size_t i = 0; i < 1000; ++i) {
-        int* value_ptr = nullptr;
-        ASSERT_EQ(queue.try_dequeue(value_ptr), true);
-        ASSERT_NE(value_ptr, nullptr);
-        delete value_ptr;
+        int value = -1;
+        ASSERT_EQ(queue.try_dequeue(&value), true);
+        ASSERT_NE(value, -1);
     }
 }
 
