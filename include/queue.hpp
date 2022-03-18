@@ -11,28 +11,27 @@ template<typename T>
 struct Node {
     T m_value;
     Node* m_next_ptr;
-    explicit Node(T value);
+    explicit Node(T value) : m_value{value}, m_next_ptr{nullptr} {};
 };
-
-template<typename T>
-Node<T>::Node(T value) : m_value{value}, m_next_ptr{nullptr} {}
 
 template<typename T>
 class Queue {
 public:
-    Queue() = default;
+    Queue() : m_size{0}, m_head_ptr{nullptr}, m_tail_ptr{nullptr} {};
     ~Queue();
+    Queue(const Queue&) = delete;
+    Queue& operator=(const Queue&) = delete;
     void enqueue(const T& value);
     T dequeue();
     bool try_dequeue(T* value_ptr);
-    [[nodiscard]] size_t size() const { return m_size; };
+    [[nodiscard]] size_t get_size() const;
 
 private:
-    size_t m_size = 0;
-    Node<T>* m_head_ptr = nullptr;
-    Node<T>* m_tail_ptr = nullptr;
-    std::mutex m_mutex;
-    std::condition_variable_any m_condition_var;
+    size_t m_size;
+    Node<T>* m_head_ptr;
+    Node<T>* m_tail_ptr;
+    mutable std::mutex m_mutex;
+    std::condition_variable m_condition_var;
 };
 
 template<typename T>
@@ -46,39 +45,38 @@ Queue<T>::~Queue() {
 
 template<typename T>
 void Queue<T>::enqueue(const T& value) {
-    m_mutex.lock();
-    ++m_size;
-    auto* temp = new Node<T>{value};
-    if (!m_head_ptr) {
-        m_head_ptr = m_tail_ptr = temp;
-    } else {
-        m_tail_ptr->m_next_ptr = temp;
-        m_tail_ptr = m_tail_ptr->m_next_ptr;
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        ++m_size;
+        auto* temp = new Node<T>{value};
+        if (!m_head_ptr) {
+            m_head_ptr = m_tail_ptr = temp;
+        } else {
+            m_tail_ptr->m_next_ptr = temp;
+            m_tail_ptr = m_tail_ptr->m_next_ptr;
+        }
     }
     m_condition_var.notify_one();
-    m_mutex.unlock();
 }
 
 template<typename T>
 T Queue<T>::dequeue() {
-    m_mutex.lock();
+    std::unique_lock<std::mutex> lock(m_mutex);
     while (m_size == 0) {
-        m_condition_var.wait(m_mutex);
+        m_condition_var.wait(lock);
     }
     --m_size;
     T value = m_head_ptr->m_value;
     Node<T>* temp = m_head_ptr;
     m_head_ptr = m_head_ptr->m_next_ptr;
     delete temp;
-    m_mutex.unlock();
     return value;
 }
 
 template<typename T>
 bool Queue<T>::try_dequeue(T* value_ptr) {
-    m_mutex.lock();
+    std::lock_guard<std::mutex> lock(m_mutex);
     if (m_size == 0) {
-        m_mutex.unlock();
         return false;
     }
     --m_size;
@@ -86,8 +84,13 @@ bool Queue<T>::try_dequeue(T* value_ptr) {
     Node<T>* temp = m_head_ptr;
     m_head_ptr = m_head_ptr->m_next_ptr;
     delete temp;
-    m_mutex.unlock();
     return true;
+}
+
+template<typename T>
+size_t Queue<T>::get_size() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_size;
 }
 
 #endif //MY_QUEUE_QUEUE_HPP

@@ -30,5 +30,8 @@ int main() {
     for (size_t i = 0; i < 4; ++i) {
         threads.emplace_back(&Queue<int>::enqueue, &queue, i);
     }
+    for (auto& thread: threads) {
+        thread.join();
+    }
     return 0;
 }

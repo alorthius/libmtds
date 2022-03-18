@@ -5,6 +5,9 @@
 #include <thread>
 #include "queue.hpp"
 
+constexpr size_t NUMBER_OF_THREADS = 16;
+constexpr size_t NUMBER_OF_OPERATIONS = 10e7;
+
 class QueueTest : public ::testing::Test {
 protected:
     void SetUp() override {
@@ -18,7 +21,7 @@ protected:
 };
 
 TEST_F(QueueTest, IsEmptyInitially) {
-    EXPECT_EQ(q0.size(), 0);
+    EXPECT_EQ(q0.get_size(), 0);
 }
 
 TEST_F(QueueTest, TryDequeueWorks) {
@@ -27,52 +30,73 @@ TEST_F(QueueTest, TryDequeueWorks) {
 
     ASSERT_TRUE(q1.try_dequeue(&value));
     EXPECT_EQ(value, 1);
-    EXPECT_EQ(q1.size(), 0);
+    EXPECT_EQ(q1.get_size(), 0);
 
     ASSERT_TRUE(q2.try_dequeue(&value));
     EXPECT_EQ(value, 2);
-    EXPECT_EQ(q2.size(), 1);
+    EXPECT_EQ(q2.get_size(), 1);
 }
 
-void enqueue_test(Queue<int>& queue) {
-    for (size_t i = 0; i < 1000; ++i) {
-        queue.enqueue(i);
+void multiple_enqueue(Queue<int>& queue, size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        queue.enqueue(static_cast<int>(i));
     }
 }
 
-void try_dequeue_test(Queue<int>& queue) {
-    for (size_t i = 0; i < 1000; ++i) {
-        int value = -1;
-        ASSERT_EQ(queue.try_dequeue(&value), true);
-        ASSERT_NE(value, -1);
+void multiple_dequeue(Queue<int>& queue, size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        queue.dequeue();
     }
 }
 
-void dequeue_test(Queue<int>& queue) {
-    for (size_t i = 0; i < 1000; ++i) {
-        if (i % 2 == 0) {
+void multiple_enqueue_and_dequeue(Queue<int>& queue, size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        if (i % 5 == 4) {
             queue.dequeue();
         } else {
-            queue.enqueue(i);
+            queue.enqueue(static_cast<int>(i));
         }
     }
 }
 
-TEST_F(QueueTest, QueueWorksUnderMultipleThreads) {
-    for (size_t i = 0; i < 10e12; ++i) {
-        std::vector<std::thread> threads;
-        for (size_t j = 0; j < 4; ++j) {
-            threads.emplace_back(enqueue_test, std::ref(q0));
+/*
+ * Number of operations = n enqueues = n dequeues
+ * 1st phase: n enqueues and 0.25*n dequeues in turn
+ * 2nd phase: 0.75*n dequeues
+ */
+TEST_F(QueueTest, EnduranceTest) {
+    size_t operations_per_thread = NUMBER_OF_OPERATIONS / NUMBER_OF_THREADS;
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < NUMBER_OF_THREADS; ++i) {
+        threads.emplace_back(multiple_enqueue_and_dequeue, std::ref(q0), 5 * operations_per_thread / 4);
+    }
+    for (auto& thread: threads) {
+        thread.join();
+    }
+    threads.clear();
+    for (size_t i = 0; i < NUMBER_OF_THREADS; ++i) {
+        threads.emplace_back(multiple_dequeue, std::ref(q0), 3 * operations_per_thread / 4);
+    }
+    for (auto& thread: threads) {
+        thread.join();
+    }
+}
+
+/*
+ * Number of operations = n enqueues = n dequeues
+ * Number of threads = n readers + n writers
+ */
+TEST_F(QueueTest, ProducerConsumerTest) {
+    size_t operations_per_thread = NUMBER_OF_OPERATIONS / NUMBER_OF_THREADS;
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < NUMBER_OF_THREADS; ++i) {
+        if (i % 2 == 0) {
+            threads.emplace_back(multiple_enqueue, std::ref(q0), operations_per_thread);
+        } else {
+            threads.emplace_back(multiple_dequeue, std::ref(q0), operations_per_thread);
         }
-        threads.clear();
-        ASSERT_EQ(q0.size(), 4000);
-        for (size_t j = 0; j < 4; ++j) {
-            threads.emplace_back(try_dequeue_test, std::ref(q0));
-        }
-        threads.clear();
-        ASSERT_EQ(q0.size(), 0);
-        for (size_t j = 0; j < 4; ++j) {
-            threads.emplace_back(dequeue_test, std::ref(q0));
-        }
+    }
+    for (auto& thread: threads) {
+        thread.join();
     }
 }
