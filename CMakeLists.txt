@@ -96,6 +96,7 @@ enable_testing()
 add_executable(
 		queue_test
 		test/queue_test.cpp
+		include/queue.hpp
 )
 
 target_include_directories(queue_test PRIVATE include test)
