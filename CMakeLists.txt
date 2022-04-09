@@ -56,14 +56,14 @@ include(cmake/CompilerWarnings.cmake)
 ##########################################################
 
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp)
+add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp mtds_lib/ms_queue.hpp)
 
 #! Put path to your project headers
 target_include_directories(${PROJECT_NAME} PRIVATE mtds_lib)
 
 add_library(
 		${LIB_NAME} SHARED
-		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp)
+		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp mtds_lib/ms_queue.hpp)
 
 target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/mtds_lib)
 
