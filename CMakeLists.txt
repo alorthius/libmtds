@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.15)
 
 #! CHANGE YOUR PROJECT NAME
 #  It is used as your project's main executable name. 
-set(PROJECT_NAME my_queue)
+set(PROJECT_NAME example)
+set(LIB_NAME mtds)
 project(${PROJECT_NAME} C CXX) # project(${PROJECT_NAME} C CXX ASM)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -55,10 +56,37 @@ include(cmake/CompilerWarnings.cmake)
 ##########################################################
 
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} src/main.cpp include/queue.hpp)
+add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp)
 
 #! Put path to your project headers
-target_include_directories(${PROJECT_NAME} PRIVATE include)
+target_include_directories(${PROJECT_NAME} PRIVATE mtds_lib)
+
+add_library(
+		${LIB_NAME} SHARED
+		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp)
+
+target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/mtds_lib)
+
+##########################################################
+
+target_link_libraries(${PROJECT_NAME} ${LIB_NAME})
+
+##########################################################
+
+#! Specify output directories
+#! For different tests etc it should be `bin`. For shared library it should be `lib`
+set_target_properties(${LIB_NAME} ${PROJECT_NAME}
+		PROPERTIES
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set_target_properties(${LIB_NAME}
+		PROPERTIES
+		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
+		ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
+		LINKER_LANGUAGE CXX)
+
+#! Add external packages
+find_package(Threads REQUIRED)
+target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 ##########################################################
 # Fixed CMakeLists.txt part 
@@ -73,3 +101,35 @@ set(ALL_TARGETS ${PROJECT_NAME})
 
 # Include CMake setup
 include(cmake/main-config.cmake)
+
+##########################################################
+# GoogleTest
+##########################################################
+
+include(FetchContent)
+FetchContent_Declare(
+		googletest
+		URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+add_executable(
+		mutex_queue_test
+		test/mutex_queue_test.cpp
+		mtds_lib/mutex_queue.hpp
+)
+
+target_include_directories(mutex_queue_test PRIVATE mtds_lib test)
+
+target_link_libraries(
+		mutex_queue_test
+		gtest_main
+		Threads::Threads
+)
+
+include(GoogleTest)
+gtest_discover_tests(example)

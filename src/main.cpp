@@ -2,27 +2,35 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include <iostream>
-#include "queue.hpp"
+#include <thread>
+#include <vector>
+#include "mutex_queue.hpp"
 
 int main() {
-    queue_t<int> queue_int;
-    queue_int.enqueue(1);
-    queue_int.enqueue(2);
-    std::cout << queue_int.dequeue() << std::endl;
-    std::cout << queue_int.dequeue() << std::endl;
-    queue_int.enqueue(3);
-    queue_int.enqueue(4);
-    std::cout << queue_int.dequeue() << std::endl;
-    std::cout << queue_int.dequeue() << std::endl;
-
-    queue_t<std::string> queue_string;
-    queue_string.enqueue("one");
-    queue_string.enqueue("two");
-    std::cout << queue_string.dequeue() << std::endl;
-    std::cout << queue_string.dequeue() << std::endl;
-    queue_string.enqueue("three");
-    queue_string.enqueue("four");
-    std::cout << queue_string.dequeue() << std::endl;
-    std::cout << queue_string.dequeue() << std::endl;
+    mtds::MutexQueue<int> queue;
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < 4; ++i) {
+        threads.emplace_back(&mtds::MutexQueue<int>::enqueue, &queue, i);
+    }
+    for (auto& thread: threads) {
+        thread.join();
+    }
+    threads.clear();
+    for (size_t i = 0; i < 4; ++i) {
+        threads.emplace_back(&mtds::MutexQueue<int>::try_dequeue, &queue);
+    }
+    for (auto& thread: threads) {
+        thread.join();
+    }
+    threads.clear();
+    for (size_t i = 0; i < 4; ++i) {
+        threads.emplace_back(&mtds::MutexQueue<int>::dequeue, &queue);
+    }
+    for (size_t i = 0; i < 4; ++i) {
+        threads.emplace_back(&mtds::MutexQueue<int>::enqueue, &queue, i);
+    }
+    for (auto& thread: threads) {
+        thread.join();
+    }
     return 0;
 }
