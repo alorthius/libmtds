@@ -19,8 +19,7 @@ public:
 private:
     template<typename U>
     struct Node {
-        Node() = delete;
-        U m_value;
+        U m_value{};
         Node* m_next_ptr = nullptr;
     };
     std::atomic<size_t> m_size = 0;
