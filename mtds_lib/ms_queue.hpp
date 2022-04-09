@@ -9,7 +9,7 @@ namespace mtds {
 template<typename T>
 class MsQueue {
 public:
-    MsQueue() = default;
+    MsQueue();
     ~MsQueue();
     MsQueue(const MsQueue&) = delete;
     MsQueue& operator=(const MsQueue&) = delete;
@@ -27,6 +27,12 @@ private:
     Node<T>* m_head_ptr = nullptr;
     Node<T>* m_tail_ptr = nullptr;
 };
+
+template<typename T>
+MsQueue<T>::MsQueue() {
+    m_head_ptr = Node<T>{};  // dummy node
+    m_tail_ptr = m_head_ptr;
+}
 
 template<typename T>
 MsQueue<T>::~MsQueue() {
