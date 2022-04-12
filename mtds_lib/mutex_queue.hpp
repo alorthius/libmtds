@@ -24,14 +24,13 @@ public:
     [[nodiscard]] size_t size() const { return m_size; }
 
 private:
-    template<typename U>
     struct Node {
-        U m_value{};
+        T m_value{};
         Node* m_next_ptr = nullptr;
     };
     std::atomic<size_t> m_size = 0;
-    Node<T>* m_head_ptr = nullptr;
-    Node<T>* m_tail_ptr = nullptr;
+    Node* m_head_ptr = nullptr;
+    Node* m_tail_ptr = nullptr;
     std::mutex m_mutex;
     std::condition_variable m_cv_empty;
 };
@@ -48,9 +47,9 @@ MutexQueue<T>::~MutexQueue() {
 template<typename T>
 void MutexQueue<T>::enqueue(const T& value) {
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::lock_guard<std::mutex> lock{m_mutex};
         ++m_size;
-        auto temp = new Node<T>{value};
+        auto temp = new Node{value};
         if (!m_head_ptr) {
             m_head_ptr = m_tail_ptr = temp;
         } else {
@@ -63,7 +62,7 @@ void MutexQueue<T>::enqueue(const T& value) {
 
 template<typename T>
 T MutexQueue<T>::dequeue() {
-    std::unique_lock<std::mutex> lock(m_mutex);
+    std::unique_lock<std::mutex> lock{m_mutex};
     m_cv_empty.wait(lock, [this]{ return m_size != 0; });
     --m_size;
     auto value = std::move(m_head_ptr->m_value);
@@ -75,7 +74,7 @@ T MutexQueue<T>::dequeue() {
 
 template<typename T>
 std::optional<T> MutexQueue<T>::try_dequeue() {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock{m_mutex};
     if (m_size == 0) {
         return {};
     }
