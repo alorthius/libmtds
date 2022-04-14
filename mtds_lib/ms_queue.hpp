@@ -6,7 +6,6 @@
 
 #include <atomic>
 #include <optional>
-#include <bitset>  // TODO: REMOVE
 
 namespace mtds {
 
