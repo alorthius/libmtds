@@ -27,24 +27,19 @@ namespace details {
 
 FORCE_INLINE uintptr_t increment(uintptr_t tagged_ptr) {
     auto inc_tag =
-            ((0x3ffc & tagged_ptr >> 50) | (0x3 & tagged_ptr)) + 1;
-    return ((0x3ffc & inc_tag) << 50) | (0x3 & inc_tag)
-           | (0xffffffffffffc & tagged_ptr);
+            ((0x3ffc & tagged_ptr >> 50) | (0b11 & tagged_ptr)) + 1;
+    return ((0x3ffc & inc_tag) << 50) | (0b11 & inc_tag)
+           | (0x000ffffffffffffc & tagged_ptr);
 }
 
 FORCE_INLINE uintptr_t combine_and_increment(uintptr_t ptr, uintptr_t tag) {
     auto inc_tag = increment(tag);
-    return (0xffffffffffffc & ptr) | (0xfff0000000000003 & inc_tag);
-}
-
-template<typename T>
-uintptr_t to_tagged_ptr(T* ptr) {
-    return 0xffffffffffffc & reinterpret_cast<uintptr_t>(ptr);
+    return (0x000ffffffffffffc & ptr) | (0xfff0000000000003 & inc_tag);
 }
 
 template<typename T>
 T* from_tagged_ptr(uintptr_t tagged_ptr) {
-    return reinterpret_cast<T*>(0xffffffffffffc & tagged_ptr);
+    return reinterpret_cast<T*>(0x000ffffffffffffc & tagged_ptr);
 }
 
 }  // namespace details
@@ -62,8 +57,8 @@ public:
 
 private:
     struct Node {
-        std::atomic<uintptr_t> m_next_ptr = reinterpret_cast<uintptr_t>(nullptr);
         T m_value{};
+        std::atomic<uintptr_t> m_next_ptr = reinterpret_cast<uintptr_t>(nullptr);
     };
     std::atomic<size_t> m_size = 0;
     std::atomic<uintptr_t> m_head_ptr{};
@@ -72,7 +67,7 @@ private:
 
 template<typename T>
 MsQueue<T>::MsQueue() {
-    auto dummy_node = details::to_tagged_ptr(new Node{});
+    auto dummy_node = reinterpret_cast<uintptr_t>(new Node{});
     m_head_ptr.store(dummy_node, std::memory_order_release);
     m_tail_ptr.store(dummy_node, std::memory_order_release);
 }
@@ -116,7 +111,7 @@ std::optional<T> MsQueue<T>::dequeue() {
 template<typename T>
 void MsQueue<T>::enqueue(const T &value) {
     // TODO: extract node from freelist
-    auto new_node = details::to_tagged_ptr(new Node{value});
+    auto new_node = reinterpret_cast<uintptr_t>(new Node{value});
     uintptr_t tail;
 
     while (true) {
