@@ -74,15 +74,15 @@ MsQueue<T>::MsQueue() {
 
 template<typename T>
 std::optional<T> MsQueue<T>::dequeue() {
-    uintptr_t head;
+    uintptr_t next;
     while (true) {
-        head = m_head_ptr.load(std::memory_order_relaxed);
+        auto head = m_head_ptr.load(std::memory_order_relaxed);
         // Is head consistent?
         if (head != m_head_ptr.load(std::memory_order_acquire)) {
             continue;
         }
         auto tail = m_tail_ptr.load(std::memory_order_relaxed);
-        auto next = details::from_tagged_ptr<Node>(head)->m_next_ptr.load(
+        next = details::from_tagged_ptr<Node>(head)->m_next_ptr.load(
                 std::memory_order_acquire);
         // Is head still consistent?
         if (head != m_head_ptr.load(std::memory_order_relaxed)) {
@@ -105,7 +105,7 @@ std::optional<T> MsQueue<T>::dequeue() {
     }
     --m_size;
     // TODO: implement memory disposal
-    return details::from_tagged_ptr<Node>(head)->m_value;
+    return details::from_tagged_ptr<Node>(next)->m_value;
 }
 
 template<typename T>
