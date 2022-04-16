@@ -113,6 +113,43 @@ std::optional<T> MsQueue<T>::dequeue() {
     return details::from_tagged_ptr<Node>(head)->value;
 }
 
+template<typename T>
+void MsQueue<T>::enqueue(const T &value) {
+    // TODO: extract node from freelist
+    auto new_node = details::to_tagged_ptr(new Node{value});
+    uintptr_t tail;
+
+    while (true) {
+        tail = m_tail_ptr.load(std::memory_order_relaxed);
+
+        // Is tail consistent?
+        if (tail != m_tail_ptr.load(std::memory_order_acquire)) { continue; }
+
+        auto next = details::from_tagged_ptr<Node>(tail)->m_next_ptr.load(
+                std::memory_order_acquire);
+
+        // Is tail still consistent?
+        if (tail != m_tail_ptr) { continue; }
+
+        // m_tail_ptr not pointing to the last node
+        if (next != reinterpret_cast<uintptr_t>(nullptr)) {
+            // Try to swing m_tail_ptr to the next node
+            m_tail_ptr.compare_exchange_weak( tail, details::increment(next), std::memory_order_release );
+            continue;
+        }
+
+        // m_tail_ptr was pointing to the last node
+        Node *tmp = nullptr;
+        auto t_next = details::from_tagged_ptr<Node>(tail)->m_next_ptr;
+
+        // Try to link node at the end of the linked list
+        if (t_next.compare_exchange_strong( tmp, details::combine_and_increment(new_node, next), std::memory_order_release )) { break; }
+    }
+    // Enqueue is done. Try to swing tail to the inserted node
+    m_tail_ptr.compare_exchange_strong( tail, details::combine_and_increment(new_node, tail), std::memory_order_acq_rel );
+    ++m_size;
+}
+
 }  // namespace mtds
 
 #endif //MTDSLIB_MS_QUEUE_HPP
