@@ -110,7 +110,7 @@ std::optional<T> MsQueue<T>::dequeue() {
     }
     --m_size;
     // TODO: implement memory disposal
-    return details::from_tagged_ptr<Node>(head)->value;
+    return details::from_tagged_ptr<Node>(head)->m_value;
 }
 
 template<typename T>
