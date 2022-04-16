@@ -27,14 +27,14 @@ namespace details {
 
 FORCE_INLINE uintptr_t increment(uintptr_t tagged_ptr) {
     auto inc_tag =
-            ((0x000000000000fff & tagged_ptr >> 52) ^ (0x0000000000000003 & tagged_ptr)) + 1;
-    return (0xfff0000000000000 & inc_tag << 52) | (0x0000000000000003 & inc_tag)
-           | (0x000ffffffffffffc & tagged_ptr);
+            ((0x3ffc & tagged_ptr >> 50) ^ (0x3 & tagged_ptr)) + 1;
+    return ((0x3ffc & inc_tag) << 50) | (0x3 & inc_tag)
+           | (0xffffffffffffc & tagged_ptr);
 }
 
 FORCE_INLINE uintptr_t combine_and_increment(uintptr_t ptr, uintptr_t tag) {
     auto inc_tag = increment(tag);
-    return (0x000ffffffffffffc & ptr) | (0xfff0000000000003 & inc_tag);
+    return (0xffffffffffffc & ptr) | (0xfff0000000000003 & inc_tag);
 }
 
 template<typename T>
