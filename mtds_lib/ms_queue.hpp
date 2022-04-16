@@ -7,14 +7,34 @@
 #include <atomic>
 #include <optional>
 
+#ifdef _MSC_VER
+#define FORCE_INLINE __forceinline
+#elif defined(__GNUC__)
+#define FORCE_INLINE inline __attribute__((__always_inline__))
+#elif defined(__clang__)
+#if __has_attribute(__always_inline__)
+#define FORCE_INLINE inline __attribute__((__always_inline__))
+#else
+#define FORCE_INLINE inline
+#endif
+#else
+#define FORCE_INLINE inline
+#endif
+
 namespace mtds {
 
 namespace details {
 
-inline __attribute__((always_inline)) uintptr_t get_incremented_tag(uintptr_t tagged_ptr) {
+FORCE_INLINE uintptr_t get_incremented_tag(uintptr_t tagged_ptr) {
     auto inc_tag =
             ((0x000000000003ffc & tagged_ptr >> 50) ^ (0x0000000000000003 & tagged_ptr)) + 1;
     return (0x1110000000000000 & inc_tag << 50) | (0x0000000000000003 & inc_tag)
+           | (0x0003fffffffffffc & tagged_ptr);
+}
+
+FORCE_INLINE uintptr_t get_new_tag(uintptr_t tagged_ptr, unsigned short tag) {
+    auto casted_tag = static_cast<uintptr_t>(tag);
+    return (0x1110000000000000 & casted_tag << 50) | (0x0000000000000003 & casted_tag)
            | (0x0003fffffffffffc & tagged_ptr);
 }
 
@@ -78,13 +98,14 @@ std::optional<T> MsQueue<T>::dequeue() {
         if (next == reinterpret_cast<uintptr_t>(nullptr)) {
             return {};
         }
+        auto inc_next = details::get_incremented_tag(next);
         // Is m_tail_ptr falling behind?
         if (head == tail) {
-            m_tail_ptr.compare_exchange_strong(tail, next, std::memory_order_release);
+            m_tail_ptr.compare_exchange_strong(tail, inc_next, std::memory_order_release);
             continue;
         }
         // Try to swing m_head_ptr to the next node
-        if (m_head_ptr.compare_exchange_strong(head, next, std::memory_order_release)) {
+        if (m_head_ptr.compare_exchange_strong(head, inc_next, std::memory_order_release)) {
             break;
         }
     }
