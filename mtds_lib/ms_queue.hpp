@@ -139,11 +139,10 @@ void MsQueue<T>::enqueue(const T &value) {
         }
 
         // m_tail_ptr was pointing to the last node
-        Node *tmp = nullptr;
-        auto t_next = details::from_tagged_ptr<Node>(tail)->m_next_ptr;
+        auto tmp = reinterpret_cast<uintptr_t>(nullptr);
 
         // Try to link node at the end of the linked list
-        if (t_next.compare_exchange_strong( tmp, details::combine_and_increment(new_node, next), std::memory_order_release )) { break; }
+        if (details::from_tagged_ptr<Node>(tail)->m_next_ptr.compare_exchange_strong( tmp, details::combine_and_increment(new_node, next), std::memory_order_release )) { break; }
     }
     // Enqueue is done. Try to swing tail to the inserted node
     m_tail_ptr.compare_exchange_strong( tail, details::combine_and_increment(new_node, tail), std::memory_order_acq_rel );
