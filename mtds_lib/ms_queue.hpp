@@ -146,4 +146,6 @@ void MsQueue<T>::enqueue(const T &value) {
 
 }  // namespace mtds
 
+#undef FORCE_INLINE
+
 #endif //MTDSLIB_MS_QUEUE_HPP
