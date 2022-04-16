@@ -25,17 +25,16 @@ namespace mtds {
 
 namespace details {
 
-FORCE_INLINE uintptr_t get_incremented_tag(uintptr_t tagged_ptr) {
+FORCE_INLINE uintptr_t increment(uintptr_t tagged_ptr) {
     auto inc_tag =
-            ((0x000000000003ffc & tagged_ptr >> 50) ^ (0x0000000000000003 & tagged_ptr)) + 1;
-    return (0x1110000000000000 & inc_tag << 50) | (0x0000000000000003 & inc_tag)
-           | (0x0003fffffffffffc & tagged_ptr);
+            ((0x000000000000fff & tagged_ptr >> 52) ^ (0x0000000000000003 & tagged_ptr)) + 1;
+    return (0xfff0000000000000 & inc_tag << 52) | (0x0000000000000003 & inc_tag)
+           | (0x000ffffffffffffc & tagged_ptr);
 }
 
-FORCE_INLINE uintptr_t get_new_tag(uintptr_t tagged_ptr, unsigned short tag) {
-    auto casted_tag = static_cast<uintptr_t>(tag);
-    return (0x1110000000000000 & casted_tag << 50) | (0x0000000000000003 & casted_tag)
-           | (0x0003fffffffffffc & tagged_ptr);
+FORCE_INLINE uintptr_t combine_and_increment(uintptr_t ptr, uintptr_t tag) {
+    auto inc_tag = increment(tag);
+    return (0x000ffffffffffffc & ptr) | (0xfff0000000000003 & inc_tag);
 }
 
 template<typename T>
@@ -98,7 +97,7 @@ std::optional<T> MsQueue<T>::dequeue() {
         if (next == reinterpret_cast<uintptr_t>(nullptr)) {
             return {};
         }
-        auto inc_next = details::get_incremented_tag(next);
+        auto inc_next = details::increment(next);
         // Is m_tail_ptr falling behind?
         if (head == tail) {
             m_tail_ptr.compare_exchange_strong(tail, inc_next, std::memory_order_release);
