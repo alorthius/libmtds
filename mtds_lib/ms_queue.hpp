@@ -27,7 +27,7 @@ namespace details {
 
 FORCE_INLINE uintptr_t increment(uintptr_t tagged_ptr) {
     auto inc_tag =
-            ((0x3ffc & tagged_ptr >> 50) ^ (0x3 & tagged_ptr)) + 1;
+            ((0x3ffc & tagged_ptr >> 50) | (0x3 & tagged_ptr)) + 1;
     return ((0x3ffc & inc_tag) << 50) | (0x3 & inc_tag)
            | (0xffffffffffffc & tagged_ptr);
 }
@@ -39,12 +39,12 @@ FORCE_INLINE uintptr_t combine_and_increment(uintptr_t ptr, uintptr_t tag) {
 
 template<typename T>
 uintptr_t to_tagged_ptr(T* ptr) {
-    return 0x0003fffffffffffc & reinterpret_cast<uintptr_t>(ptr);
+    return 0xffffffffffffc & reinterpret_cast<uintptr_t>(ptr);
 }
 
 template<typename T>
 T* from_tagged_ptr(uintptr_t tagged_ptr) {
-    return reinterpret_cast<T*>(0x0003fffffffffffc & tagged_ptr);
+    return reinterpret_cast<T*>(0xffffffffffffc & tagged_ptr);
 }
 
 }  // namespace details
