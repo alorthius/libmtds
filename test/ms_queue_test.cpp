@@ -5,7 +5,7 @@
 #include <thread>
 #include <numeric>
 #include <random>
-#include "mutex_queue.hpp"
+#include "ms_queue.hpp"
 
 constexpr size_t NUMBER_OF_THREADS = 8;
 constexpr size_t NUMBER_OF_OPERATIONS = 10e6;
@@ -17,9 +17,10 @@ protected:
         q2.enqueue(2);
         q2.enqueue(3);
     }
-    mtds::MutexQueue<int> q0;
-    mtds::MutexQueue<int> q1;
-    mtds::MutexQueue<int> q2;
+
+    mtds::MsQueue<int> q0;
+    mtds::MsQueue<int> q1;
+    mtds::MsQueue<int> q2;
 };
 
 TEST_F(QueueTest, IsEmptyInitially) {
@@ -40,7 +41,7 @@ TEST_F(QueueTest, TryDequeueWorks) {
     EXPECT_EQ(q2.size(), 1);
 }
 
-void multiple_enqueue(mtds::MutexQueue<int>& queue, size_t number_of_operations) {
+void multiple_enqueue(mtds::MsQueue<int>& queue, size_t number_of_operations) {
     std::random_device r;
     std::default_random_engine e1{r()};
     std::uniform_int_distribution<size_t> uniform_dist{1, 10};
@@ -51,18 +52,19 @@ void multiple_enqueue(mtds::MutexQueue<int>& queue, size_t number_of_operations)
     }
 }
 
-void multiple_dequeue(mtds::MutexQueue<int>& queue, size_t number_of_operations, int& sum) {
+void multiple_dequeue(mtds::MsQueue<int>& queue, size_t number_of_operations, int& sum) {
     std::random_device r;
     std::default_random_engine e1{r()};
     std::uniform_int_distribution<size_t> uniform_dist{1, 5};
 
     for (size_t i = 0; i < number_of_operations; ++i) {
+        std::optional<int> temp;
         sum += queue.dequeue();
         std::this_thread::sleep_for(std::chrono::microseconds(uniform_dist(e1)));
     }
 }
 
-void multiple_enqueue_and_dequeue(mtds::MutexQueue<int>& queue, size_t number_of_operations, int& sum) {
+void multiple_enqueue_and_dequeue(mtds::MsQueue<int>& queue, size_t number_of_operations, int& sum) {
     std::random_device r;
     std::default_random_engine e1{r()};
     std::uniform_int_distribution<size_t> uniform_dist_1{1, 10};
