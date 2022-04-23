@@ -133,3 +133,17 @@ target_link_libraries(
 
 include(GoogleTest)
 gtest_discover_tests(example)
+
+##########################################################
+# Benchmark
+##########################################################
+find_package(benchmark REQUIRED)
+
+add_executable(
+		mutex_queue_benchmark
+		mtds_lib/mutex_queue.hpp
+		benchmark/mutex_queue_benchmark.cpp)
+
+target_link_libraries(${PROJECT_NAME} benchmark::benchmark)
+
+target_include_directories(mutex_queue_benchmark PRIVATE benchmark mtds_lib)
