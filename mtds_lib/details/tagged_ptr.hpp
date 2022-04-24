@@ -18,7 +18,7 @@
 #define FORCE_INLINE inline
 #endif
 
-namespace mtds::details {
+namespace mtds::tp {
 
 using tagged_ptr = uintptr_t;
 
