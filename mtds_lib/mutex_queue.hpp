@@ -22,14 +22,18 @@ public:
     MutexQueue(const MutexQueue&) = delete;
     MutexQueue& operator=(const MutexQueue&) = delete;
 
-    [[nodiscard]] bool empty() const { return m_size == 0; };
+    [[nodiscard]] bool empty() const { return m_size == 0; }
     [[nodiscard]] size_type size() const { return m_size; }
 
-    void clear() { while (try_dequeue().has_value()) continue; };
-    template<typename U>
-    void enqueue(U&& value);
+    void clear() { while (try_dequeue().has_value()) continue; }
+    template<typename U> void enqueue(U&& value);
     std::optional<T> try_dequeue();
     T dequeue();
+
+    // Synonyms
+    template<typename U> void push(U&& value) { enqueue(std::forward<U>(value)); }
+    std::optional<T> try_pop() { return try_dequeue(); }
+    T pop() { return dequeue(); }
 
 private:
     struct Node {

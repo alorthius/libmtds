@@ -3,12 +3,12 @@
 
 #include <gtest/gtest.h>
 #include "container_tests.hpp"
-#include "ms_queue.hpp"
+#include "treiber_stack.hpp"
 
 constexpr size_t NUMBER_OF_THREADS = 8;
 constexpr size_t NUMBER_OF_OPERATIONS = 10e6;
 
-class MsQueueTest : public ::testing::Test {
+class TreiberStackTest : public ::testing::Test {
 protected:
     void SetUp() override {
         c1.push(1);
@@ -16,12 +16,12 @@ protected:
         c2.push(3);
     }
 
-    mtds::MsQueue<int> c0;
-    mtds::MsQueue<int> c1;
-    mtds::MsQueue<int> c2;
+    mtds::TreiberStack<int> c0;
+    mtds::TreiberStack<int> c1;
+    mtds::TreiberStack<int> c2;
 };
 
-TEST_F(MsQueueTest, IsEmptyInitially) {
+TEST_F(TreiberStackTest, IsEmptyInitially) {
     EXPECT_EQ(c0.size(), 0);
     EXPECT_TRUE(c0.empty());
 
@@ -29,7 +29,7 @@ TEST_F(MsQueueTest, IsEmptyInitially) {
     EXPECT_FALSE(c1.empty());
 }
 
-TEST_F(MsQueueTest, TryDequeueWorks) {
+TEST_F(TreiberStackTest, TryDequeueWorks) {
     EXPECT_FALSE(c0.try_pop().has_value());
 
     auto value = c1.try_pop();
@@ -43,19 +43,19 @@ TEST_F(MsQueueTest, TryDequeueWorks) {
     EXPECT_EQ(c2.size(), 1);
 }
 
-TEST_F(MsQueueTest, ClearWorks) {
+TEST_F(TreiberStackTest, ClearWorks) {
     c2.clear();
     EXPECT_EQ(c2.size(), 0);
     EXPECT_TRUE(c2.empty());
 }
 
-TEST_F(MsQueueTest, EnduranceTest) {
+TEST_F(TreiberStackTest, EnduranceTest) {
     auto sum = endurance_test(c0, NUMBER_OF_THREADS, NUMBER_OF_OPERATIONS);
     EXPECT_EQ(sum, NUMBER_OF_OPERATIONS);
 }
 
 
-TEST_F(MsQueueTest, ProducerConsumerTest) {
+TEST_F(TreiberStackTest, ProducerConsumerTest) {
     auto sum = producer_consumer_test(c0, NUMBER_OF_THREADS, NUMBER_OF_OPERATIONS);
     EXPECT_EQ(sum, NUMBER_OF_OPERATIONS);
 }

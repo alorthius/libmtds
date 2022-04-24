@@ -2,131 +2,60 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include <gtest/gtest.h>
-#include <thread>
-#include <numeric>
-#include <random>
+#include "container_tests.hpp"
 #include "mutex_queue.hpp"
 
 constexpr size_t NUMBER_OF_THREADS = 8;
 constexpr size_t NUMBER_OF_OPERATIONS = 10e6;
 
-class QueueTest : public ::testing::Test {
+class MutexQueueTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        q1.enqueue(1);
-        q2.enqueue(2);
-        q2.enqueue(3);
+        c1.push(1);
+        c2.push(2);
+        c2.push(3);
     }
-    mtds::MutexQueue<int> q0;
-    mtds::MutexQueue<int> q1;
-    mtds::MutexQueue<int> q2;
+
+    mtds::MutexQueue<int> c0;
+    mtds::MutexQueue<int> c1;
+    mtds::MutexQueue<int> c2;
 };
 
-TEST_F(QueueTest, IsEmptyInitially) {
-    EXPECT_EQ(q0.size(), 0);
+TEST_F(MutexQueueTest, IsEmptyInitially) {
+    EXPECT_EQ(c0.size(), 0);
+    EXPECT_TRUE(c0.empty());
+
+    EXPECT_NE(c1.size(), 0);
+    EXPECT_FALSE(c1.empty());
 }
 
-TEST_F(QueueTest, TryDequeueWorks) {
-    EXPECT_FALSE(q0.try_dequeue().has_value());
+TEST_F(MutexQueueTest, TryDequeueWorks) {
+    EXPECT_FALSE(c0.try_pop().has_value());
 
-    auto value = q1.try_dequeue();
+    auto value = c1.try_pop();
     ASSERT_TRUE(value.has_value());
     EXPECT_EQ(value, 1);
-    EXPECT_EQ(q1.size(), 0);
+    EXPECT_EQ(c1.size(), 0);
 
-    value = q2.try_dequeue();
+    value = c2.try_pop();
     ASSERT_TRUE(value.has_value());
     EXPECT_EQ(value, 2);
-    EXPECT_EQ(q2.size(), 1);
+    EXPECT_EQ(c2.size(), 1);
 }
 
-void multiple_enqueue(mtds::MutexQueue<int>& queue, size_t number_of_operations) {
-    std::random_device r;
-    std::default_random_engine e1{r()};
-    std::uniform_int_distribution<size_t> uniform_dist{1, 10};
-
-    for (size_t i = 0; i < number_of_operations; ++i) {
-        queue.enqueue(1);
-        std::this_thread::sleep_for(std::chrono::microseconds(uniform_dist(e1)));
-    }
+TEST_F(MutexQueueTest, ClearWorks) {
+    c2.clear();
+    EXPECT_EQ(c2.size(), 0);
+    EXPECT_TRUE(c2.empty());
 }
 
-void multiple_dequeue(mtds::MutexQueue<int>& queue, size_t number_of_operations, int& sum) {
-    std::random_device r;
-    std::default_random_engine e1{r()};
-    std::uniform_int_distribution<size_t> uniform_dist{1, 5};
-
-    for (size_t i = 0; i < number_of_operations; ++i) {
-        sum += queue.dequeue();
-        std::this_thread::sleep_for(std::chrono::microseconds(uniform_dist(e1)));
-    }
+TEST_F(MutexQueueTest, EnduranceTest) {
+    auto sum = endurance_test(c0, NUMBER_OF_THREADS, NUMBER_OF_OPERATIONS);
+    EXPECT_EQ(sum, NUMBER_OF_OPERATIONS);
 }
 
-void multiple_enqueue_and_dequeue(mtds::MutexQueue<int>& queue, size_t number_of_operations, int& sum) {
-    std::random_device r;
-    std::default_random_engine e1{r()};
-    std::uniform_int_distribution<size_t> uniform_dist_1{1, 10};
-    std::uniform_int_distribution<size_t> uniform_dist_2{1, 5};
 
-    for (size_t i = 0; i < number_of_operations; ++i) {
-        if (i % 5 != 4) {
-            queue.enqueue(1);
-            std::this_thread::sleep_for(std::chrono::microseconds(uniform_dist_1(e1)));
-        } else {
-            sum += queue.dequeue();
-            std::this_thread::sleep_for(std::chrono::microseconds(uniform_dist_2(e1)));
-        }
-    }
-}
-
-/*
- * Number of operations = n enqueues = n dequeues
- * 1st phase: n enqueues and 0.25*n dequeues in turn
- * 2nd phase: 0.75*n dequeues
- */
-TEST_F(QueueTest, EnduranceTest) {
-    size_t operations_per_thread = NUMBER_OF_OPERATIONS / NUMBER_OF_THREADS;
-    std::vector<std::thread> threads;
-    std::vector<int> sums(NUMBER_OF_THREADS);
-
-    for (size_t i = 0; i < NUMBER_OF_THREADS; ++i) {
-        threads.emplace_back(multiple_enqueue_and_dequeue, std::ref(q0),
-                             5 * operations_per_thread / 4, std::ref(sums[i]));
-    }
-    for (auto& thread: threads) {
-        thread.join();
-    }
-    threads.clear();
-
-    for (size_t i = 0; i < NUMBER_OF_THREADS; ++i) {
-        threads.emplace_back(multiple_dequeue, std::ref(q0), 3 * operations_per_thread / 4,
-                             std::ref(sums[i]));
-    }
-    for (auto& thread: threads) {
-        thread.join();
-    }
-    EXPECT_EQ(std::accumulate(sums.begin(), sums.end(), 0), NUMBER_OF_OPERATIONS);
-}
-
-/*
- * Number of operations = n enqueues = n dequeues
- * Number of threads = n readers + n writers
- */
-TEST_F(QueueTest, ProducerConsumerTest) {
-    size_t operations_per_thread = 2 * NUMBER_OF_OPERATIONS / NUMBER_OF_THREADS;
-    std::vector<std::thread> threads;
-    std::vector<int> sums(NUMBER_OF_THREADS);
-
-    for (size_t i = 0; i < NUMBER_OF_THREADS; ++i) {
-        if (i % 2 == 0) {
-            threads.emplace_back(multiple_enqueue, std::ref(q0), operations_per_thread);
-        } else {
-            threads.emplace_back(multiple_dequeue, std::ref(q0), operations_per_thread,
-                                 std::ref(sums[i]));
-        }
-    }
-    for (auto& thread: threads) {
-        thread.join();
-    }
-    EXPECT_EQ(std::accumulate(sums.begin(), sums.end(), 0), NUMBER_OF_OPERATIONS);
+TEST_F(MutexQueueTest, ProducerConsumerTest) {
+    auto sum = producer_consumer_test(c0, NUMBER_OF_THREADS, NUMBER_OF_OPERATIONS);
+    EXPECT_EQ(sum, NUMBER_OF_OPERATIONS);
 }

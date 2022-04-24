@@ -120,7 +120,7 @@ enable_testing()
 add_executable(
 		mutex_queue_test
 		test/mutex_queue_test.cpp
-		mtds_lib/mutex_queue.hpp)
+		mtds_lib/mutex_queue.hpp test/container_tests.cpp test/container_tests.hpp)
 
 target_include_directories(mutex_queue_test PRIVATE mtds_lib test)
 
@@ -133,12 +133,25 @@ target_link_libraries(
 add_executable(
 		ms_queue_test
 		test/ms_queue_test.cpp
-		mtds_lib/ms_queue.hpp)
+		mtds_lib/ms_queue.hpp test/container_tests.cpp test/container_tests.hpp)
 
 target_include_directories(ms_queue_test PRIVATE mtds_lib test)
 
 target_link_libraries(
 		ms_queue_test
+		gtest_main
+		Threads::Threads
+)
+
+add_executable(
+		treiber_stack_test
+		test/treiber_stack_test.cpp
+		mtds_lib/treiber_stack.hpp test/container_tests.cpp test/container_tests.hpp)
+
+target_include_directories(treiber_stack_test PRIVATE mtds_lib test)
+
+target_link_libraries(
+		treiber_stack_test
 		gtest_main
 		Threads::Threads
 )
