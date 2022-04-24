@@ -51,6 +51,7 @@ std::optional<T> TreiberStack<T>::try_pop() {
             return {};
         }
         auto next = tp::from_tagged_ptr<Node>(top)->next_ptr.load(std::memory_order_relaxed);
+        // Try to swing m_top_ptr to the next node
         if (m_top_ptr.compare_exchange_weak(top, tp::combine_and_increment(next, top),
                                             std::memory_order_acquire, std::memory_order_relaxed)) {
             --m_size;
