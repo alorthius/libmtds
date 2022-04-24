@@ -68,6 +68,21 @@ T TreiberStack<T>::pop() {
     return temp.value();
 }
 
+template<typename T>
+template<typename U>
+void TreiberStack<T>::push(U &&value) {
+    auto new_node = tp::to_tagged_ptr( new Node{std::forward<T>(value)} );
+    auto top = m_top_ptr.load(std::memory_order_relaxed);
+
+    while (true) {
+        tp::from_tagged_ptr<Node>(new_node)->next_ptr.store( top, std::memory_order_relaxed );
+        if (m_top_ptr.compare_exchange_weak( top, tp::increment(new_node), std::memory_order_release, std::memory_order_acquire )) {
+            ++m_size;
+            return;
+        }
+    }
+}
+
 }  // namespace mtds
 
 #endif //LIBMTDS_TREIBER_STACK_HPP
