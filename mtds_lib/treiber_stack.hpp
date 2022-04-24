@@ -15,7 +15,6 @@ class TreiberStack {
 public:
     using value_type = T;
     using size_type = size_t;
-    using tagged_ptr = tp::tagged_ptr;
 
     TreiberStack() = default;
     ~TreiberStack() { clear(); }
@@ -23,31 +22,45 @@ public:
     TreiberStack& operator=(const TreiberStack&) = delete;
 
     [[nodiscard]] bool empty() const {
-        return m_top_ptr.load(std::memory_order_relaxed) == tp::tagged_nullptr;
+        return tp::from_tagged_ptr<Node>(m_top_ptr.load(std::memory_order_relaxed)) == nullptr;
     }
     [[nodiscard]] size_type size() const { return m_size; }
 
     void clear() { while (try_pop().has_value()) continue; }
-    template<typename U>
-    void push(U&& value);
+    template<typename U> void push(U&& value);
     std::optional<T> try_pop();
     T pop();
 
 private:
-    struct Node {
-        T value{};
-        std::atomic<tagged_ptr> next_ptr = tp::tagged_nullptr;
-    };
+    using tagged_ptr = tp::tagged_ptr;
+    using Node = tp::Node<T>;
+
     std::atomic<size_type> m_size = 0;
     std::atomic<tagged_ptr> m_top_ptr = tp::tagged_nullptr;
 };
+
+template<typename T>
+template<typename U>
+void TreiberStack<T>::push(U &&value) {
+    auto new_node = tp::to_tagged_ptr( new Node{std::forward<T>(value)} );
+    auto top = m_top_ptr.load(std::memory_order_relaxed);
+
+    while (true) {
+        tp::from_tagged_ptr<Node>(new_node)->next_ptr.store( top, std::memory_order_relaxed );
+        if (m_top_ptr.compare_exchange_weak( top, tp::combine_and_increment(new_node, top),
+                                             std::memory_order_release, std::memory_order_acquire )) {
+            ++m_size;
+            return;
+        }
+    }
+}
 
 template<typename T>
 std::optional<T> TreiberStack<T>::try_pop() {
     while (true) {
         auto top = m_top_ptr.load(std::memory_order_acquire);
         // Is stack empty?
-        if (top == tp::tagged_nullptr) {
+        if (tp::from_tagged_ptr<Node>(top) == nullptr) {
             return {};
         }
         auto next = tp::from_tagged_ptr<Node>(top)->next_ptr.load(std::memory_order_relaxed);
@@ -55,7 +68,9 @@ std::optional<T> TreiberStack<T>::try_pop() {
         if (m_top_ptr.compare_exchange_weak(top, tp::combine_and_increment(next, top),
                                             std::memory_order_acquire, std::memory_order_relaxed)) {
             --m_size;
-            return tp::from_tagged_ptr<Node>(top)->value;
+            auto value = tp::from_tagged_ptr<Node>(top)->value;
+            delete tp::from_tagged_ptr<Node>(top);
+            return value;
         }
     }
 }
@@ -67,21 +82,6 @@ T TreiberStack<T>::pop() {
         temp = try_pop();
     } while (!temp.has_value());
     return temp.value();
-}
-
-template<typename T>
-template<typename U>
-void TreiberStack<T>::push(U &&value) {
-    auto new_node = tp::to_tagged_ptr( new Node{std::forward<T>(value)} );
-    auto top = m_top_ptr.load(std::memory_order_relaxed);
-
-    while (true) {
-        tp::from_tagged_ptr<Node>(new_node)->next_ptr.store( top, std::memory_order_relaxed );
-        if (m_top_ptr.compare_exchange_weak( top, tp::increment(new_node), std::memory_order_release, std::memory_order_acquire )) {
-            ++m_size;
-            return;
-        }
-    }
 }
 
 }  // namespace mtds

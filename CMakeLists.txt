@@ -56,14 +56,16 @@ include(cmake/CompilerWarnings.cmake)
 ##########################################################
 
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp mtds_lib/ms_queue.hpp mtds_lib/details/tagged_ptr.hpp mtds_lib/treiber_stack.hpp)
+add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp mtds_lib/ms_queue.hpp
+		mtds_lib/details/tagged_ptr.hpp mtds_lib/treiber_stack.hpp)
 
 #! Put path to your project headers
 target_include_directories(${PROJECT_NAME} PRIVATE mtds_lib)
 
 add_library(
 		${LIB_NAME} SHARED
-		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp mtds_lib/ms_queue.hpp mtds_lib/details/tagged_ptr.hpp mtds_lib/treiber_stack.hpp)
+		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp mtds_lib/ms_queue.hpp
+		mtds_lib/details/tagged_ptr.hpp mtds_lib/treiber_stack.hpp mtds_lib/details/free_list.hpp)
 
 target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/mtds_lib)
 
@@ -120,7 +122,7 @@ enable_testing()
 add_executable(
 		mutex_queue_test
 		test/mutex_queue_test.cpp
-		mtds_lib/mutex_queue.hpp test/container_tests.cpp test/container_tests.hpp)
+		mtds_lib/mutex_queue.hpp test/container_tests.hpp)
 
 target_include_directories(mutex_queue_test PRIVATE mtds_lib test)
 
@@ -133,7 +135,7 @@ target_link_libraries(
 add_executable(
 		ms_queue_test
 		test/ms_queue_test.cpp
-		mtds_lib/ms_queue.hpp test/container_tests.cpp test/container_tests.hpp)
+		mtds_lib/ms_queue.hpp test/container_tests.hpp)
 
 target_include_directories(ms_queue_test PRIVATE mtds_lib test)
 
@@ -146,12 +148,25 @@ target_link_libraries(
 add_executable(
 		treiber_stack_test
 		test/treiber_stack_test.cpp
-		mtds_lib/treiber_stack.hpp test/container_tests.cpp test/container_tests.hpp)
+		mtds_lib/treiber_stack.hpp test/container_tests.hpp)
 
 target_include_directories(treiber_stack_test PRIVATE mtds_lib test)
 
 target_link_libraries(
 		treiber_stack_test
+		gtest_main
+		Threads::Threads
+)
+
+add_executable(
+		free_list_test
+		test/free_list_test.cpp
+		mtds_lib/details/free_list.hpp test/container_tests.hpp)
+
+target_include_directories(free_list_test PRIVATE mtds_lib test)
+
+target_link_libraries(
+		free_list_test
 		gtest_main
 		Threads::Threads
 )

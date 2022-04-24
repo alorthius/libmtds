@@ -15,7 +15,6 @@ class MsQueue {
 public:
     using value_type = T;
     using size_type = size_t;
-    using tagged_ptr = tp::tagged_ptr;
 
     MsQueue();
     ~MsQueue();
@@ -36,10 +35,9 @@ public:
     T pop() { return dequeue(); }
 
 private:
-    struct Node {
-        T value{};
-        std::atomic<tagged_ptr> next_ptr = tp::tagged_nullptr;
-    };
+    using tagged_ptr = tp::tagged_ptr;
+    using Node = tp::Node<T>;
+
     std::atomic<size_type> m_size = 0;
     std::atomic<tagged_ptr> m_head_ptr{};
     std::atomic<tagged_ptr> m_tail_ptr{};

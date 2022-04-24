@@ -6,7 +6,7 @@
 #include "mutex_queue.hpp"
 
 constexpr size_t NUMBER_OF_THREADS = 8;
-constexpr size_t NUMBER_OF_OPERATIONS = 10e6;
+constexpr size_t NUM_OPERATIONS = 10e6;
 
 class MutexQueueTest : public ::testing::Test {
 protected:
@@ -50,12 +50,12 @@ TEST_F(MutexQueueTest, ClearWorks) {
 }
 
 TEST_F(MutexQueueTest, EnduranceTest) {
-    auto sum = endurance_test(c0, NUMBER_OF_THREADS, NUMBER_OF_OPERATIONS);
-    EXPECT_EQ(sum, NUMBER_OF_OPERATIONS);
+    auto sum = endurance_test(c0, NUMBER_OF_THREADS, NUM_OPERATIONS);
+    EXPECT_EQ(sum, NUM_OPERATIONS);
 }
 
 
 TEST_F(MutexQueueTest, ProducerConsumerTest) {
-    auto sum = producer_consumer_test(c0, NUMBER_OF_THREADS, NUMBER_OF_OPERATIONS);
-    EXPECT_EQ(sum, NUMBER_OF_OPERATIONS);
+    auto sum = producer_consumer_test(c0, NUMBER_OF_THREADS, NUM_OPERATIONS);
+    EXPECT_EQ(sum, NUM_OPERATIONS);
 }

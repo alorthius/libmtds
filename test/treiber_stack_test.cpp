@@ -5,8 +5,9 @@
 #include "container_tests.hpp"
 #include "treiber_stack.hpp"
 
-constexpr size_t NUMBER_OF_THREADS = 8;
-constexpr size_t NUMBER_OF_OPERATIONS = 10e6;
+constexpr size_t NUM_PRODUCERS = 8;
+constexpr size_t NUM_CONSUMERS = 1;
+constexpr size_t NUM_OPERATIONS = 10e6;
 
 class TreiberStackTest : public ::testing::Test {
 protected:
@@ -39,7 +40,7 @@ TEST_F(TreiberStackTest, TryDequeueWorks) {
 
     value = c2.try_pop();
     ASSERT_TRUE(value.has_value());
-    EXPECT_EQ(value, 2);
+    EXPECT_EQ(value, 3);
     EXPECT_EQ(c2.size(), 1);
 }
 
@@ -50,12 +51,12 @@ TEST_F(TreiberStackTest, ClearWorks) {
 }
 
 TEST_F(TreiberStackTest, EnduranceTest) {
-    auto sum = endurance_test(c0, NUMBER_OF_THREADS, NUMBER_OF_OPERATIONS);
-    EXPECT_EQ(sum, NUMBER_OF_OPERATIONS);
+    auto sum = endurance_test(c0, std::min(NUM_PRODUCERS, NUM_CONSUMERS), NUM_OPERATIONS);
+    EXPECT_EQ(sum, NUM_OPERATIONS);
 }
 
 
 TEST_F(TreiberStackTest, ProducerConsumerTest) {
-    auto sum = producer_consumer_test(c0, NUMBER_OF_THREADS, NUMBER_OF_OPERATIONS);
-    EXPECT_EQ(sum, NUMBER_OF_OPERATIONS);
+    auto sum = producer_consumer_test(c0, NUM_PRODUCERS, NUM_CONSUMERS, NUM_OPERATIONS);
+    EXPECT_EQ(sum, NUM_OPERATIONS);
 }

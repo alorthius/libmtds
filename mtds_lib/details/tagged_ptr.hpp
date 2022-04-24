@@ -24,6 +24,12 @@ using tagged_ptr = uintptr_t;
 
 constexpr tagged_ptr tagged_nullptr = 0;
 
+template<typename T>
+struct Node {
+    T value{};
+    std::atomic<tagged_ptr> next_ptr = tagged_nullptr;
+};
+
 FORCE_INLINE tagged_ptr increment(tagged_ptr ptr) {
     auto inc_tag = ((0x3ffc & ptr >> 50) | (0b11 & ptr)) + 1;
     return ((0x3ffc & inc_tag) << 50) | (0b11 & inc_tag) | (0x000ffffffffffffc & ptr);
