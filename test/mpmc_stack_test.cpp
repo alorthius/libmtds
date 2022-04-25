@@ -3,13 +3,13 @@
 
 #include <gtest/gtest.h>
 #include "container_tests.hpp"
-#include "treiber_stack.hpp"
+#include "mpmc_stack.hpp"
 
-constexpr size_t NUM_PRODUCERS = 8;
-constexpr size_t NUM_CONSUMERS = 1;
-constexpr size_t NUM_OPERATIONS = 10e6;
+constexpr size_t NUM_PRODUCERS = 4;
+constexpr size_t NUM_CONSUMERS = 4;
+constexpr size_t NUM_OPERATIONS = 10e4;
 
-class TreiberStackTest : public ::testing::Test {
+class MpmcStackTest : public ::testing::Test {
 protected:
     void SetUp() override {
         c1.push(1);
@@ -17,12 +17,12 @@ protected:
         c2.push(3);
     }
 
-    mtds::TreiberStack<int> c0;
-    mtds::TreiberStack<int> c1;
-    mtds::TreiberStack<int> c2;
+    mtds::MpmcStack<int> c0;
+    mtds::MpmcStack<int> c1;
+    mtds::MpmcStack<int> c2;
 };
 
-TEST_F(TreiberStackTest, IsEmptyInitially) {
+TEST_F(MpmcStackTest, IsEmptyInitially) {
     EXPECT_EQ(c0.size(), 0);
     EXPECT_TRUE(c0.empty());
 
@@ -30,7 +30,7 @@ TEST_F(TreiberStackTest, IsEmptyInitially) {
     EXPECT_FALSE(c1.empty());
 }
 
-TEST_F(TreiberStackTest, TryDequeueWorks) {
+TEST_F(MpmcStackTest, TryDequeueWorks) {
     EXPECT_FALSE(c0.try_pop().has_value());
 
     auto value = c1.try_pop();
@@ -44,19 +44,19 @@ TEST_F(TreiberStackTest, TryDequeueWorks) {
     EXPECT_EQ(c2.size(), 1);
 }
 
-TEST_F(TreiberStackTest, ClearWorks) {
+TEST_F(MpmcStackTest, ClearWorks) {
     c2.clear();
     EXPECT_EQ(c2.size(), 0);
     EXPECT_TRUE(c2.empty());
 }
 
-TEST_F(TreiberStackTest, EnduranceTest) {
+TEST_F(MpmcStackTest, EnduranceTest) {
     auto sum = endurance_test(c0, std::min(NUM_PRODUCERS, NUM_CONSUMERS), NUM_OPERATIONS);
     EXPECT_EQ(sum, NUM_OPERATIONS);
 }
 
 
-TEST_F(TreiberStackTest, ProducerConsumerTest) {
+TEST_F(MpmcStackTest, ProducerConsumerTest) {
     auto sum = producer_consumer_test(c0, NUM_PRODUCERS, NUM_CONSUMERS, NUM_OPERATIONS);
     EXPECT_EQ(sum, NUM_OPERATIONS);
 }

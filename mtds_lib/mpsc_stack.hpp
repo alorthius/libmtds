@@ -1,8 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#ifndef LIBMTDS_TREIBER_STACK_HPP
-#define LIBMTDS_TREIBER_STACK_HPP
+#ifndef LIBMTDS_MPSC_STACK_HPP
+#define LIBMTDS_MPSC_STACK_HPP
 
 #include <atomic>
 #include <optional>
@@ -11,15 +11,15 @@
 namespace mtds {
 
 template<typename T>
-class TreiberStack {
+class MpscStack {
 public:
     using value_type = T;
     using size_type = size_t;
 
-    TreiberStack() = default;
-    ~TreiberStack() { clear(); }
-    TreiberStack(const TreiberStack&) = delete;
-    TreiberStack& operator=(const TreiberStack&) = delete;
+    MpscStack() = default;
+    ~MpscStack() { clear(); }
+    MpscStack(const MpscStack&) = delete;
+    MpscStack& operator=(const MpscStack&) = delete;
 
     [[nodiscard]] bool empty() const {
         return tp::from_tagged_ptr<Node>(m_top_ptr.load(std::memory_order_relaxed)) == nullptr;
@@ -37,11 +37,13 @@ private:
 
     std::atomic<size_type> m_size = 0;
     std::atomic<tagged_ptr> m_top_ptr = tp::tagged_nullptr;
+
+    virtual void dispose_node(Node* node_ptr) { delete node_ptr; }
 };
 
 template<typename T>
 template<typename U>
-void TreiberStack<T>::push(U &&value) {
+void MpscStack<T>::push(U &&value) {
     auto new_node = tp::to_tagged_ptr( new Node{std::forward<U>(value)} );
     auto top = m_top_ptr.load(std::memory_order_relaxed);
 
@@ -56,7 +58,7 @@ void TreiberStack<T>::push(U &&value) {
 }
 
 template<typename T>
-std::optional<T> TreiberStack<T>::try_pop() {
+std::optional<T> MpscStack<T>::try_pop() {
     while (true) {
         auto top = m_top_ptr.load(std::memory_order_acquire);
         // Is stack empty?
@@ -69,14 +71,14 @@ std::optional<T> TreiberStack<T>::try_pop() {
                                             std::memory_order_acquire, std::memory_order_relaxed)) {
             --m_size;
             auto value = tp::from_tagged_ptr<Node>(top)->value;
-            delete tp::from_tagged_ptr<Node>(top);
+            dispose_node(tp::from_tagged_ptr<Node>(top));
             return value;
         }
     }
 }
 
 template<typename T>
-T TreiberStack<T>::pop() {
+T MpscStack<T>::pop() {
     std::optional<T> temp;
     do {
         temp = try_pop();
@@ -86,4 +88,4 @@ T TreiberStack<T>::pop() {
 
 }  // namespace mtds
 
-#endif //LIBMTDS_TREIBER_STACK_HPP
+#endif //LIBMTDS_MPSC_STACK_HPP

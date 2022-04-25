@@ -1,23 +1,22 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#ifndef MTDSLIB_MPMC_QUEUE_HPP
-#define MTDSLIB_MPMC_QUEUE_HPP
+#ifndef LIBMTDS_MPMC_STACK_HPP
+#define LIBMTDS_MPMC_STACK_HPP
 
 #include <atomic>
 #include <optional>
-#include "mpsc_queue.hpp"
+#include "mpsc_stack.hpp"
 #include "details/free_list.hpp"
 
 namespace mtds {
 
 template<typename T>
-class MpmcQueue final : public MpscQueue<T> {
+class MpmcStack final : public MpscStack<T> {
     tp::FreeList<T> m_free_list{};
 
-    void dispose_node(tp::Node<T>* node_ptr) override { m_free_list.push(node_ptr); }
-};
+    void dispose_node(tp::Node<T>* node_ptr) override { m_free_list.push(node_ptr); }};
 
 }  // namespace mtds
 
-#endif //MTDSLIB_MPMC_QUEUE_HPP
+#endif //LIBMTDS_MPMC_STACK_HPP

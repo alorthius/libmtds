@@ -1,8 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#ifndef MTDSLIB_MS_QUEUE_HPP
-#define MTDSLIB_MS_QUEUE_HPP
+#ifndef LIBMTDS_MPSC_QUEUE_HPP
+#define LIBMTDS_MPSC_QUEUE_HPP
 
 #include <atomic>
 #include <optional>
@@ -41,6 +41,8 @@ private:
     std::atomic<size_type> m_size = 0;
     std::atomic<tagged_ptr> m_head_ptr{};
     std::atomic<tagged_ptr> m_tail_ptr{};
+
+    virtual void dispose_node(Node* node_ptr) { delete node_ptr; }
 };
 
 template<typename T>
@@ -122,7 +124,7 @@ std::optional<T> MpscQueue<T>::try_dequeue() {
         }
     }
     --m_size;
-    delete tp::from_tagged_ptr<Node>(head);
+    dispose_node(tp::from_tagged_ptr<Node>(head));
     return tp::from_tagged_ptr<Node>(next)->value;
 }
 
@@ -144,4 +146,4 @@ bool MpscQueue<T>::empty() const {
 
 }  // namespace mtds
 
-#endif //MTDSLIB_MS_QUEUE_HPP
+#endif //LIBMTDS_MPSC_QUEUE_HPP

@@ -57,7 +57,7 @@ include(cmake/CompilerWarnings.cmake)
 
 #! Project main executable source compilation
 add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp mtds_lib/mpsc_queue.hpp
-		mtds_lib/details/tagged_ptr.hpp mtds_lib/treiber_stack.hpp mtds_lib/mpmc_queue.hpp)
+		mtds_lib/details/tagged_ptr.hpp mtds_lib/mpsc_stack.hpp mtds_lib/mpmc_queue.hpp mtds_lib/mpmc_stack.hpp)
 
 #! Put path to your project headers
 target_include_directories(${PROJECT_NAME} PRIVATE mtds_lib)
@@ -65,7 +65,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE mtds_lib)
 add_library(
 		${LIB_NAME} SHARED
 		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp mtds_lib/mpsc_queue.hpp
-		mtds_lib/details/tagged_ptr.hpp mtds_lib/treiber_stack.hpp mtds_lib/details/free_list.hpp mtds_lib/mpmc_queue.hpp)
+		mtds_lib/details/tagged_ptr.hpp mtds_lib/mpsc_stack.hpp mtds_lib/details/free_list.hpp mtds_lib/mpmc_queue.hpp mtds_lib/mpmc_stack.hpp)
 
 target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/mtds_lib)
 
@@ -159,14 +159,27 @@ target_link_libraries(
 )
 
 add_executable(
-		treiber_stack_test
-		test/treiber_stack_test.cpp
-		mtds_lib/treiber_stack.hpp test/container_tests.hpp)
+		mpsc_stack_test
+		test/mpsc_stack_test.cpp
+		mtds_lib/mpsc_stack.hpp test/container_tests.hpp)
 
-target_include_directories(treiber_stack_test PRIVATE mtds_lib test)
+target_include_directories(mpsc_stack_test PRIVATE mtds_lib test)
 
 target_link_libraries(
-		treiber_stack_test
+		mpsc_stack_test
+		gtest_main
+		Threads::Threads
+)
+
+add_executable(
+		mpmc_stack_test
+		test/mpmc_stack_test.cpp
+		mtds_lib/mpmc_stack.hpp test/container_tests.hpp)
+
+target_include_directories(mpmc_stack_test PRIVATE mtds_lib test)
+
+target_link_libraries(
+		mpmc_stack_test
 		gtest_main
 		Threads::Threads
 )
