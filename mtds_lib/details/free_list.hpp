@@ -14,15 +14,10 @@ template<typename T>
 class FreeList {
 public:
     FreeList() = default;
-    ~FreeList() { clear(); };
+    ~FreeList();
     FreeList(const FreeList&) = delete;
     FreeList& operator=(const FreeList&) = delete;
 
-    [[nodiscard]] bool empty() const {
-        return tp::from_tagged_ptr<Node>(m_top_ptr.load(std::memory_order_relaxed)) == nullptr;
-    }
-
-    void clear();
     template<typename U> void push(U&& value);
 
 private:
@@ -48,16 +43,16 @@ void FreeList<T>::push(U &&value) {
 }
 
 template<typename T>
-void FreeList<T>::clear() {
-    for (auto top = m_top_ptr.load(std::memory_order_relaxed);
-         tp::from_tagged_ptr<Node>(top) != nullptr;
-         top = tp::from_tagged_ptr<Node>(top)->next_ptr.load(std::memory_order_relaxed)) {
+FreeList<T>::~FreeList() {
+    auto top = m_top_ptr.load(std::memory_order_relaxed);
+    while (tp::from_tagged_ptr<Node>(top) != nullptr) {
         delete tp::from_tagged_ptr<Node>(top)->value;
+        auto next = tp::from_tagged_ptr<Node>(top)->next_ptr.load(std::memory_order_relaxed);
         delete tp::from_tagged_ptr<Node>(top);
+        top = next;
     }
-
 }
 
-}  // namespace mtds::fl
+}  // namespace mtds::tp
 
 #endif //LIBMTDS_FREE_LIST_HPP
