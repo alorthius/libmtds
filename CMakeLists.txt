@@ -144,6 +144,6 @@ add_executable(
 		mtds_lib/mutex_queue.hpp
 		benchmark/mutex_queue_benchmark.cpp)
 
-target_link_libraries(${PROJECT_NAME} benchmark::benchmark)
+target_link_libraries(mutex_queue_benchmark benchmark::benchmark)
 
 target_include_directories(mutex_queue_benchmark PRIVATE benchmark mtds_lib)
