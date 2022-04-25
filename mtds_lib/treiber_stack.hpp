@@ -42,7 +42,7 @@ private:
 template<typename T>
 template<typename U>
 void TreiberStack<T>::push(U &&value) {
-    auto new_node = tp::to_tagged_ptr( new Node{std::forward<T>(value)} );
+    auto new_node = tp::to_tagged_ptr( new Node{std::forward<U>(value)} );
     auto top = m_top_ptr.load(std::memory_order_relaxed);
 
     while (true) {

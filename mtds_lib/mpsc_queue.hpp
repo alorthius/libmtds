@@ -11,15 +11,15 @@
 namespace mtds {
 
 template<typename T>
-class MsQueue {
+class MpscQueue {
 public:
     using value_type = T;
     using size_type = size_t;
 
-    MsQueue();
-    ~MsQueue();
-    MsQueue(const MsQueue&) = delete;
-    MsQueue& operator=(const MsQueue&) = delete;
+    MpscQueue();
+    ~MpscQueue();
+    MpscQueue(const MpscQueue&) = delete;
+    MpscQueue& operator=(const MpscQueue&) = delete;
 
     [[nodiscard]] bool empty() const;
     [[nodiscard]] size_type size() const { return m_size; }
@@ -44,26 +44,25 @@ private:
 };
 
 template<typename T>
-MsQueue<T>::MsQueue() {
+MpscQueue<T>::MpscQueue() {
     auto dummy_node = tp::to_tagged_ptr(new Node{});
     m_head_ptr.store(dummy_node, std::memory_order_release);
     m_tail_ptr.store(dummy_node, std::memory_order_release);
 }
 
 template<typename T>
-MsQueue<T>::~MsQueue() {
+MpscQueue<T>::~MpscQueue() {
     clear();
     auto head = m_head_ptr.load(std::memory_order_relaxed);
     m_head_ptr.store(tp::tagged_nullptr, std::memory_order_relaxed);
     m_tail_ptr.store(tp::tagged_nullptr, std::memory_order_relaxed);
-    // TODO: dispose head
+    delete tp::from_tagged_ptr<Node>(head);
 }
 
 template<typename T>
 template<typename U>
-void MsQueue<T>::enqueue(U&& value) {
-    // TODO: extract node from freelist
-    auto new_node = tp::to_tagged_ptr(new Node{std::forward<T>(value)});
+void MpscQueue<T>::enqueue(U&& value) {
+    auto new_node = tp::to_tagged_ptr(new Node{std::forward<U>(value)});
     tagged_ptr tail;
 
     while (true) {
@@ -97,10 +96,10 @@ void MsQueue<T>::enqueue(U&& value) {
 }
 
 template<typename T>
-std::optional<T> MsQueue<T>::try_dequeue() {
-    tagged_ptr next;
+std::optional<T> MpscQueue<T>::try_dequeue() {
+    tagged_ptr head, next;
     while (true) {
-        auto head = m_head_ptr.load(std::memory_order_acquire);
+        head = m_head_ptr.load(std::memory_order_acquire);
         next = tp::from_tagged_ptr<Node>(head)->next_ptr.load(std::memory_order_acquire);
         // Is head consistent?
         if (head != m_head_ptr.load(std::memory_order_acquire)) {
@@ -123,12 +122,12 @@ std::optional<T> MsQueue<T>::try_dequeue() {
         }
     }
     --m_size;
-    // TODO: implement memory disposal
+    delete tp::from_tagged_ptr<Node>(head);
     return tp::from_tagged_ptr<Node>(next)->value;
 }
 
 template<typename T>
-T MsQueue<T>::dequeue() {
+T MpscQueue<T>::dequeue() {
     std::optional<T> temp;
     do {
         temp = try_dequeue();
@@ -137,7 +136,7 @@ T MsQueue<T>::dequeue() {
 }
 
 template<typename T>
-bool MsQueue<T>::empty() const {
+bool MpscQueue<T>::empty() const {
     auto head = m_head_ptr.load(std::memory_order_acquire);
     auto next = tp::from_tagged_ptr<Node>(head)->next_ptr.load(std::memory_order_relaxed);
     return next == tp::tagged_nullptr;

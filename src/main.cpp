@@ -5,7 +5,7 @@
 #include <thread>
 #include <vector>
 #include "mutex_queue.hpp"
-#include "ms_queue.hpp"
+#include "mpsc_queue.hpp"
 #include "treiber_stack.hpp"
 
 int main() {

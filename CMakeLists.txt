@@ -56,16 +56,16 @@ include(cmake/CompilerWarnings.cmake)
 ##########################################################
 
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp mtds_lib/ms_queue.hpp
-		mtds_lib/details/tagged_ptr.hpp mtds_lib/treiber_stack.hpp)
+add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp mtds_lib/mpsc_queue.hpp
+		mtds_lib/details/tagged_ptr.hpp mtds_lib/treiber_stack.hpp mtds_lib/mpmc_queue.hpp)
 
 #! Put path to your project headers
 target_include_directories(${PROJECT_NAME} PRIVATE mtds_lib)
 
 add_library(
 		${LIB_NAME} SHARED
-		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp mtds_lib/ms_queue.hpp
-		mtds_lib/details/tagged_ptr.hpp mtds_lib/treiber_stack.hpp mtds_lib/details/free_list.hpp)
+		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp mtds_lib/mpsc_queue.hpp
+		mtds_lib/details/tagged_ptr.hpp mtds_lib/treiber_stack.hpp mtds_lib/details/free_list.hpp mtds_lib/mpmc_queue.hpp)
 
 target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/mtds_lib)
 
@@ -133,14 +133,27 @@ target_link_libraries(
 )
 
 add_executable(
-		ms_queue_test
-		test/ms_queue_test.cpp
-		mtds_lib/ms_queue.hpp test/container_tests.hpp)
+		mpsc_queue_test
+		test/mpsc_queue_test.cpp
+		mtds_lib/mpsc_queue.hpp test/container_tests.hpp)
 
-target_include_directories(ms_queue_test PRIVATE mtds_lib test)
+target_include_directories(mpsc_queue_test PRIVATE mtds_lib test)
 
 target_link_libraries(
-		ms_queue_test
+		mpsc_queue_test
+		gtest_main
+		Threads::Threads
+)
+
+add_executable(
+		mpmc_queue_test
+		test/mpmc_queue_test.cpp
+		mtds_lib/mpmc_queue.hpp test/container_tests.hpp)
+
+target_include_directories(mpmc_queue_test PRIVATE mtds_lib test)
+
+target_link_libraries(
+		mpmc_queue_test
 		gtest_main
 		Threads::Threads
 )

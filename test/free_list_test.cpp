@@ -7,16 +7,16 @@
 #include "details/tagged_ptr.hpp"
 #include "details/free_list.hpp"
 
-constexpr size_t NUM_PRODUCERS = 8;
-constexpr size_t NUM_OPERATIONS = 10e6;
+constexpr size_t NUM_PRODUCERS = 4;
+constexpr size_t NUM_OPERATIONS = 10e4;
 
 class FreeListTest : public ::testing::Test {
 protected:
-    mtds::tp::FreeList<mtds::tp::Node<int>*> c0;
+    mtds::tp::FreeList<int> c0;
     std::vector<std::thread> threads;
 };
 
-void multiple_push(mtds::tp::FreeList<mtds::tp::Node<int>*>& container, size_t num_operations) {
+void multiple_push(mtds::tp::FreeList<int>& container, size_t num_operations) {
     std::random_device r;
     std::default_random_engine e1{r()};
     std::uniform_int_distribution<size_t> uniform_dist{1, 10};

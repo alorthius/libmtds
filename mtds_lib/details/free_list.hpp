@@ -22,7 +22,7 @@ public:
 
 private:
     using tagged_ptr = tp::tagged_ptr;
-    using Node = tp::Node<T>;
+    using Node = tp::Node<tp::Node<T>*>;
 
     std::atomic<tagged_ptr> m_top_ptr = tp::tagged_nullptr;
 };
@@ -30,7 +30,7 @@ private:
 template<typename T>
 template<typename U>
 void FreeList<T>::push(U &&value) {
-    auto new_node = tp::to_tagged_ptr( new Node{std::forward<T>(value)} );
+    auto new_node = tp::to_tagged_ptr( new Node{std::forward<U>(value)} );
     auto top = m_top_ptr.load(std::memory_order_relaxed);
 
     while (true) {
