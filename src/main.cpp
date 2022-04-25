@@ -1,16 +1,15 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include <iostream>
-#include <thread>
-#include <vector>
-#include "mutex_queue.hpp"
 #include "mpsc_queue.hpp"
-#include "treiber_stack.hpp"
+#include "mpmc_queue.hpp"
+#include "mpsc_stack.hpp"
+#include "mpmc_stack.hpp"
 
 int main() {
-    mtds::TreiberStack<int> c;
-    c.push(1);
-    std::cout << c.pop() << std::endl;
+    mtds::MpscQueue<int> c1;
+    mtds::MpmcQueue<int> c2;
+    mtds::MpscStack<int> c3;
+    mtds::MpmcStack<int> c4;
     return 0;
 }

@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.15)
 
 #! CHANGE YOUR PROJECT NAME
 #  It is used as your project's main executable name. 
-set(PROJECT_NAME example)
+set(PROJECT_NAME mtds_example)
 set(LIB_NAME mtds)
 project(${PROJECT_NAME} C CXX) # project(${PROJECT_NAME} C CXX ASM)
 
@@ -198,4 +198,4 @@ target_link_libraries(
 )
 
 include(GoogleTest)
-gtest_discover_tests(example)
+gtest_discover_tests(${PROJECT_NAME})
