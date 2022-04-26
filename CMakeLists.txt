@@ -31,7 +31,7 @@ set(ENABLE_PVS_STUDIO OFF)
 
 #! UndefinedBehaviorSanitizer (UBSan)
 #  Info: https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
-set(ENABLE_UBSan ON)
+set(ENABLE_UBSan OFF)
 #! AddressSanitizer -- detects use after free or after scope exit,
 #  memory overflows and leaks.  
 #  Info: https://github.com/google/sanitizers/wiki/AddressSanitizer
