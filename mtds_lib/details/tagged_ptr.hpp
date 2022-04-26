@@ -37,7 +37,7 @@ FORCE_INLINE tagged_ptr increment(tagged_ptr ptr) {
 
 FORCE_INLINE tagged_ptr combine_and_increment(tagged_ptr ptr, tagged_ptr tag) {
     auto inc_tag = increment(tag);
-    return (0x000ffffffffffffc & ptr) | (0xfff0000000000003 & inc_tag);
+    return (0x000ffffffffffffc & ptr) | (0xfff0000000000003U & inc_tag);
 }
 
 template<typename T>
