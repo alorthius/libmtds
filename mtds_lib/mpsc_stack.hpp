@@ -83,7 +83,7 @@ T MpscStack<T>::pop() {
     do {
         temp = try_pop();
     } while (!temp.has_value());
-    return temp.value();
+    return *temp;
 }
 
 }  // namespace mtds

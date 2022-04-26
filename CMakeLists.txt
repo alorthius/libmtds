@@ -18,7 +18,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 #! It is a good practice to set "WARNINGS_AS_ERRORS" ON,
 #  but sometimes it creates too much trouble, so default is OFF.
-set(WARNINGS_AS_ERRORS OFF)
+set(WARNINGS_AS_ERRORS ON)
 
 #! Always use PVS Studio while developing. 
 set(ENABLE_PVS_STUDIO OFF)
@@ -99,7 +99,8 @@ INSTALL(PROGRAMS
 		DESTINATION bin)
 
 # Define ALL_TARGETS variable to use in PVS and Sanitizers
-set(ALL_TARGETS ${PROJECT_NAME})
+set(ALL_TARGETS ${PROJECT_NAME} mutex_queue_test mpsc_queue_test mpmc_queue_test mpsc_stack_test
+		mpmc_stack_test free_list_test)
 
 # Include CMake setup
 include(cmake/main-config.cmake)

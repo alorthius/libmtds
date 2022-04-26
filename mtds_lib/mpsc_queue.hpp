@@ -134,7 +134,7 @@ T MpscQueue<T>::dequeue() {
     do {
         temp = try_dequeue();
     } while (!temp.has_value());
-    return temp.value();
+    return *temp;
 }
 
 template<typename T>
