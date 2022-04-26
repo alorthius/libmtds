@@ -31,7 +31,7 @@ set(ENABLE_PVS_STUDIO OFF)
 
 #! UndefinedBehaviorSanitizer (UBSan)
 #  Info: https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
-set(ENABLE_UBSan OFF)
+set(ENABLE_UBSan ON)
 #! AddressSanitizer -- detects use after free or after scope exit,
 #  memory overflows and leaks.  
 #  Info: https://github.com/google/sanitizers/wiki/AddressSanitizer
@@ -89,21 +89,6 @@ set_target_properties(${LIB_NAME}
 #! Add external packages
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
-
-##########################################################
-# Fixed CMakeLists.txt part 
-##########################################################
-
-INSTALL(PROGRAMS
-		$<TARGET_FILE:${PROJECT_NAME}>	# ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
-		DESTINATION bin)
-
-# Define ALL_TARGETS variable to use in PVS and Sanitizers
-set(ALL_TARGETS ${PROJECT_NAME} mutex_queue_test mpsc_queue_test mpmc_queue_test mpsc_stack_test
-		mpmc_stack_test free_list_test)
-
-# Include CMake setup
-include(cmake/main-config.cmake)
 
 ##########################################################
 # GoogleTest
@@ -200,3 +185,18 @@ target_link_libraries(
 
 include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME})
+
+##########################################################
+# Fixed CMakeLists.txt part
+##########################################################
+
+INSTALL(PROGRAMS
+		$<TARGET_FILE:${PROJECT_NAME}>	# ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
+		DESTINATION bin)
+
+# Define ALL_TARGETS variable to use in PVS and Sanitizers
+set(ALL_TARGETS ${PROJECT_NAME} mutex_queue_test mpsc_queue_test mpmc_queue_test mpsc_stack_test
+		mpmc_stack_test free_list_test)
+
+# Include CMake setup
+include(cmake/main-config.cmake)
