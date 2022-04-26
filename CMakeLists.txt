@@ -140,10 +140,11 @@ gtest_discover_tests(example)
 find_package(benchmark REQUIRED)
 
 add_executable(
-		mutex_queue_benchmark
+		mtds_benchmark
 		mtds_lib/mutex_queue.hpp
-		benchmark/mutex_queue_benchmark.cpp)
+		mtds_lib/ms_queue.hpp
+		benchmark/mtds_benchmark.cpp)
 
-target_link_libraries(mutex_queue_benchmark benchmark::benchmark)
+target_link_libraries(mtds_benchmark benchmark::benchmark)
 
-target_include_directories(mutex_queue_benchmark PRIVATE benchmark mtds_lib)
+target_include_directories(mtds_benchmark PRIVATE benchmark mtds_lib)
