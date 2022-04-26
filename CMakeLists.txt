@@ -194,7 +194,8 @@ find_package(benchmark REQUIRED)
 add_executable(
 		mtds_benchmark
 		mtds_lib/mutex_queue.hpp
-		mtds_lib/ms_queue.hpp
+		mtds_lib/mpmc_queue.hpp
+		mtds_lib/mpsc_queue.hpp
 		benchmark/mtds_benchmark.cpp)
 
 target_link_libraries(mtds_benchmark benchmark::benchmark)
