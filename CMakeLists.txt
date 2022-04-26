@@ -91,21 +91,6 @@ find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 ##########################################################
-# Fixed CMakeLists.txt part 
-##########################################################
-
-INSTALL(PROGRAMS
-		$<TARGET_FILE:${PROJECT_NAME}>	# ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
-		DESTINATION bin)
-
-# Define ALL_TARGETS variable to use in PVS and Sanitizers
-set(ALL_TARGETS ${PROJECT_NAME} mutex_queue_test mpsc_queue_test mpmc_queue_test mpsc_stack_test
-		mpmc_stack_test free_list_test)
-
-# Include CMake setup
-include(cmake/main-config.cmake)
-
-##########################################################
 # GoogleTest
 ##########################################################
 
@@ -215,3 +200,18 @@ add_executable(
 target_link_libraries(mtds_benchmark benchmark::benchmark)
 
 target_include_directories(mtds_benchmark PRIVATE benchmark mtds_lib)
+
+##########################################################
+# Fixed CMakeLists.txt part
+##########################################################
+
+INSTALL(PROGRAMS
+		$<TARGET_FILE:${PROJECT_NAME}>	# ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
+		DESTINATION bin)
+
+# Define ALL_TARGETS variable to use in PVS and Sanitizers
+set(ALL_TARGETS ${PROJECT_NAME} mutex_queue_test mpsc_queue_test mpmc_queue_test mpsc_stack_test
+		mpmc_stack_test free_list_test)
+
+# Include CMake setup
+include(cmake/main-config.cmake)
