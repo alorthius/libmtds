@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.15)
 
 #! CHANGE YOUR PROJECT NAME
 #  It is used as your project's main executable name. 
-set(PROJECT_NAME example)
+set(PROJECT_NAME mtds_example)
 set(LIB_NAME mtds)
 project(${PROJECT_NAME} C CXX) # project(${PROJECT_NAME} C CXX ASM)
 
@@ -56,14 +56,16 @@ include(cmake/CompilerWarnings.cmake)
 ##########################################################
 
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp mtds_lib/ms_queue.hpp)
+add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp mtds_lib/mpsc_queue.hpp
+		mtds_lib/details/tagged_ptr.hpp mtds_lib/mpsc_stack.hpp mtds_lib/mpmc_queue.hpp mtds_lib/mpmc_stack.hpp)
 
 #! Put path to your project headers
 target_include_directories(${PROJECT_NAME} PRIVATE mtds_lib)
 
 add_library(
 		${LIB_NAME} SHARED
-		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp mtds_lib/ms_queue.hpp)
+		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp mtds_lib/mpsc_queue.hpp
+		mtds_lib/details/tagged_ptr.hpp mtds_lib/mpsc_stack.hpp mtds_lib/details/free_list.hpp mtds_lib/mpmc_queue.hpp mtds_lib/mpmc_stack.hpp)
 
 target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/mtds_lib)
 
@@ -97,7 +99,8 @@ INSTALL(PROGRAMS
 		DESTINATION bin)
 
 # Define ALL_TARGETS variable to use in PVS and Sanitizers
-set(ALL_TARGETS ${PROJECT_NAME})
+set(ALL_TARGETS ${PROJECT_NAME} mutex_queue_test mpsc_queue_test mpmc_queue_test mpsc_stack_test
+		mpmc_stack_test free_list_test)
 
 # Include CMake setup
 include(cmake/main-config.cmake)
@@ -120,8 +123,7 @@ enable_testing()
 add_executable(
 		mutex_queue_test
 		test/mutex_queue_test.cpp
-		mtds_lib/mutex_queue.hpp
-)
+		mtds_lib/mutex_queue.hpp test/container_tests.hpp)
 
 target_include_directories(mutex_queue_test PRIVATE mtds_lib test)
 
@@ -131,8 +133,73 @@ target_link_libraries(
 		Threads::Threads
 )
 
+add_executable(
+		mpsc_queue_test
+		test/mpsc_queue_test.cpp
+		mtds_lib/mpsc_queue.hpp test/container_tests.hpp)
+
+target_include_directories(mpsc_queue_test PRIVATE mtds_lib test)
+
+target_link_libraries(
+		mpsc_queue_test
+		gtest_main
+		Threads::Threads
+)
+
+add_executable(
+		mpmc_queue_test
+		test/mpmc_queue_test.cpp
+		mtds_lib/mpmc_queue.hpp test/container_tests.hpp)
+
+target_include_directories(mpmc_queue_test PRIVATE mtds_lib test)
+
+target_link_libraries(
+		mpmc_queue_test
+		gtest_main
+		Threads::Threads
+)
+
+add_executable(
+		mpsc_stack_test
+		test/mpsc_stack_test.cpp
+		mtds_lib/mpsc_stack.hpp test/container_tests.hpp)
+
+target_include_directories(mpsc_stack_test PRIVATE mtds_lib test)
+
+target_link_libraries(
+		mpsc_stack_test
+		gtest_main
+		Threads::Threads
+)
+
+add_executable(
+		mpmc_stack_test
+		test/mpmc_stack_test.cpp
+		mtds_lib/mpmc_stack.hpp test/container_tests.hpp)
+
+target_include_directories(mpmc_stack_test PRIVATE mtds_lib test)
+
+target_link_libraries(
+		mpmc_stack_test
+		gtest_main
+		Threads::Threads
+)
+
+add_executable(
+		free_list_test
+		test/free_list_test.cpp
+		mtds_lib/details/free_list.hpp test/container_tests.hpp)
+
+target_include_directories(free_list_test PRIVATE mtds_lib test)
+
+target_link_libraries(
+		free_list_test
+		gtest_main
+		Threads::Threads
+)
+
 include(GoogleTest)
-gtest_discover_tests(example)
+gtest_discover_tests(${PROJECT_NAME})
 
 ##########################################################
 # Benchmark

@@ -1,3 +1,7 @@
+# GoogleTest
+include/gmock
+include/gtest
+
 ### C++ ###
 # Prerequisites
 *.d
