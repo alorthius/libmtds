@@ -208,6 +208,7 @@ target_include_directories(mtds_benchmark PRIVATE benchmark mtds_lib)
 
 INSTALL(PROGRAMS
 		$<TARGET_FILE:${PROJECT_NAME}>	# ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
+		$<TARGET_FILE:mtds_benchmark>
 		DESTINATION bin)
 
 # Define ALL_TARGETS variable to use in PVS and Sanitizers
