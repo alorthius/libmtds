@@ -6,7 +6,6 @@
 
 #include <atomic>
 #include <optional>
-#include <thread>
 #include "details/tagged_ptr.hpp"
 
 namespace mtds {
@@ -55,8 +54,6 @@ void MpscStack<T>::push(U &&value) {
             ++m_size;
             return;
         }
-
-        std::this_thread::yield();  // Back-off
     }
 }
 
@@ -77,7 +74,6 @@ std::optional<T> MpscStack<T>::try_pop() {
             dispose_node(tp::from_tagged_ptr<Node>(top));
             return value;
         }
-        std::this_thread::yield();  // Back-off
     }
 }
 
