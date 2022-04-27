@@ -1,0 +1,43 @@
+2022-04-27T14:13:30+01:00
+Running ./cmake-build-release/mtds_benchmark
+Run on (8 X 4900 MHz CPU s)
+CPU Caches:
+  L1 Data 32 KiB (x4)
+  L1 Instruction 32 KiB (x4)
+  L2 Unified 256 KiB (x4)
+  L3 Unified 8192 KiB (x1)
+Load Average: 6.61, 4.88, 3.34
+***WARNING*** CPU scaling is enabled, the benchmark real time measurements may be noisy and will incur extra overhead.
+---------------------------------------------------------------------------------------------------------------------------
+Benchmark                                                                                 Time             CPU   Iterations
+---------------------------------------------------------------------------------------------------------------------------
+BM_EnqueueDequeue< mtds::MutexQueue<int> >/10000000/real_time/threads:1                 608 ms          608 ms            1
+BM_EnqueueDequeue< mtds::MutexQueue<int> >/10000000/real_time/threads:2                 515 ms         1028 ms            2
+BM_EnqueueDequeue< mtds::MutexQueue<int> >/10000000/real_time/threads:4                 246 ms          980 ms            4
+BM_EnqueueDequeue< mtds::MutexQueue<int> >/10000000/real_time/threads:8                 166 ms         1228 ms            8
+BM_EnqueueDequeue< mtds::MutexQueue<int> >/10000000/real_time/threads:16                184 ms         1749 ms           16
+BM_EnqueueDequeue< mtds::MpscQueue <int> >/10000000/real_time/threads:1                 800 ms          798 ms            1
+BM_EnqueueDequeue< mtds::MpmcQueue <int> >/10000000/real_time/threads:2                 338 ms          673 ms            2
+BM_EnqueueDequeue< mtds::MpmcQueue <int> >/10000000/real_time/threads:4                 231 ms          922 ms            4
+BM_EnqueueDequeue< mtds::MpmcQueue <int> >/10000000/real_time/threads:8                 184 ms         1221 ms            8
+BM_EnqueueDequeue< mtds::MpmcQueue <int> >/10000000/real_time/threads:16                174 ms         1260 ms           16
+BM_EnqueueDequeue< mtds::MutexQueue<std::string> >/10000000/real_time/threads:1        1484 ms         1477 ms            1
+BM_EnqueueDequeue< mtds::MutexQueue<std::string> >/10000000/real_time/threads:2         560 ms         1119 ms            2
+BM_EnqueueDequeue< mtds::MutexQueue<std::string> >/10000000/real_time/threads:4         356 ms         1418 ms            4
+BM_EnqueueDequeue< mtds::MutexQueue<std::string> >/10000000/real_time/threads:8         304 ms         2057 ms            8
+BM_EnqueueDequeue< mtds::MutexQueue<std::string> >/10000000/real_time/threads:16        297 ms         2243 ms           16
+BM_EnqueueDequeue< mtds::MpscQueue <std::string> >/10000000/real_time/threads:1         980 ms          977 ms            1
+BM_EnqueueDequeue< mtds::MpmcQueue <std::string> >/10000000/real_time/threads:2         445 ms          889 ms            2
+BM_EnqueueDequeue< mtds::MpmcQueue <std::string> >/10000000/real_time/threads:4         293 ms         1166 ms            4
+BM_EnqueueDequeue< mtds::MpmcQueue <std::string> >/10000000/real_time/threads:8         205 ms         1429 ms            8
+BM_EnqueueDequeue< mtds::MpmcQueue <std::string> >/10000000/real_time/threads:16        224 ms         1505 ms           16
+BM_EnqueueDequeue< mtds::MutexQueue<MyPair> >/10000000/real_time/threads:1             1211 ms         1207 ms            1
+BM_EnqueueDequeue< mtds::MutexQueue<MyPair> >/10000000/real_time/threads:2              493 ms          984 ms            2
+BM_EnqueueDequeue< mtds::MutexQueue<MyPair> >/10000000/real_time/threads:4              315 ms         1255 ms            4
+BM_EnqueueDequeue< mtds::MutexQueue<MyPair> >/10000000/real_time/threads:8              293 ms         1962 ms            8
+BM_EnqueueDequeue< mtds::MutexQueue<MyPair> >/10000000/real_time/threads:16             242 ms         1989 ms           16
+BM_EnqueueDequeue< mtds::MpscQueue <MyPair> >/10000000/real_time/threads:1              748 ms          747 ms            1
+BM_EnqueueDequeue< mtds::MpmcQueue <MyPair> >/10000000/real_time/threads:2              299 ms          597 ms            2
+BM_EnqueueDequeue< mtds::MpmcQueue <MyPair> >/10000000/real_time/threads:4              183 ms          728 ms            4
+BM_EnqueueDequeue< mtds::MpmcQueue <MyPair> >/10000000/real_time/threads:8              163 ms         1233 ms            8
+BM_EnqueueDequeue< mtds::MpmcQueue <MyPair> >/10000000/real_time/threads:16             152 ms         1245 ms           16
