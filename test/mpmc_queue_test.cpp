@@ -7,7 +7,7 @@
 
 constexpr size_t NUM_PRODUCERS = 4;
 constexpr size_t NUM_CONSUMERS = 4;
-constexpr size_t NUM_OPERATIONS = 10e6;
+constexpr size_t NUM_OPERATIONS = 10e4;
 
 class MpmcQueueTest : public ::testing::Test {
 protected:
