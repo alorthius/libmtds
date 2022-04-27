@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include <optional>
+#include <thread>
 #include "details/tagged_ptr.hpp"
 
 namespace mtds {
