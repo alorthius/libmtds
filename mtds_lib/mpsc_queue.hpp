@@ -1,8 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#ifndef LIBMTDS_MPSC_QUEUE_HPP
-#define LIBMTDS_MPSC_QUEUE_HPP
+#ifndef MTDSLIB_MPSC_QUEUE_HPP
+#define MTDSLIB_MPSC_QUEUE_HPP
 
 #include <atomic>
 #include <optional>
@@ -150,4 +150,4 @@ bool MpscQueue<T>::empty() const {
 
 }  // namespace mtds
 
-#endif //LIBMTDS_MPSC_QUEUE_HPP
+#endif //MTDSLIB_MPSC_QUEUE_HPP

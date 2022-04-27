@@ -4,8 +4,6 @@
 #ifndef MTDSLIB_MPMC_QUEUE_HPP
 #define MTDSLIB_MPMC_QUEUE_HPP
 
-#include <atomic>
-#include <optional>
 #include "mpsc_queue.hpp"
 #include "details/free_list.hpp"
 
