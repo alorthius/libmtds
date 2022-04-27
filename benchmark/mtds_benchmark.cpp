@@ -27,7 +27,7 @@ template <typename Q, typename T = typename Q::value_type> void BM_EnqueueDequeu
 }
 
 // Test on int
-BENCHMARK(BM_EnqueueDequeue< mtds::MutexQueue<int> >)->Arg(10'000'000)->ThreadRange(1, 4)->Unit(benchmark::kMillisecond)->UseRealTime();
+BENCHMARK(BM_EnqueueDequeue< mtds::MutexQueue<int> >)->Arg(10'000'000)->ThreadRange(1, 16)->Unit(benchmark::kMillisecond)->UseRealTime();
 BENCHMARK(BM_EnqueueDequeue< mtds::MpscQueue <int> >)->Arg(10'000'000)->Threads(1)->Unit(benchmark::kMillisecond)->UseRealTime();
 BENCHMARK(BM_EnqueueDequeue< mtds::MpmcQueue <int> >)->Arg(10'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();
 
