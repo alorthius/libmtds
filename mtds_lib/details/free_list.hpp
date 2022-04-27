@@ -39,6 +39,8 @@ void FreeList<T>::push(U&& node_ptr) {
                                              std::memory_order_release, std::memory_order_acquire )) {
             return;
         }
+
+        std::this_thread::yield();  // Back-off
     }
 }
 
