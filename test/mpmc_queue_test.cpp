@@ -7,7 +7,7 @@
 
 constexpr size_t NUM_PRODUCERS = 4;
 constexpr size_t NUM_CONSUMERS = 4;
-constexpr size_t NUM_OPERATIONS = 10e4;
+constexpr size_t NUM_OPERATIONS = 10e6;
 
 class MpmcQueueTest : public ::testing::Test {
 protected:
@@ -54,7 +54,6 @@ TEST_F(MpmcQueueTest, EnduranceTest) {
     auto sum = endurance_test(c0, std::min(NUM_PRODUCERS, NUM_CONSUMERS), NUM_OPERATIONS);
     EXPECT_EQ(sum, NUM_OPERATIONS);
 }
-
 
 TEST_F(MpmcQueueTest, ProducerConsumerTest) {
     auto sum = producer_consumer_test(c0, NUM_PRODUCERS, NUM_CONSUMERS, NUM_OPERATIONS);

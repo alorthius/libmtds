@@ -55,7 +55,6 @@ TEST_F(MutexQueueTest, EnduranceTest) {
     EXPECT_EQ(sum, NUM_OPERATIONS);
 }
 
-
 TEST_F(MutexQueueTest, ProducerConsumerTest) {
     auto sum = producer_consumer_test(c0, NUM_PRODUCERS, NUM_CONSUMERS, NUM_OPERATIONS);
     EXPECT_EQ(sum, NUM_OPERATIONS);
