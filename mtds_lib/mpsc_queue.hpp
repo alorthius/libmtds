@@ -91,6 +91,8 @@ void MpscQueue<T>::enqueue(U&& value) {
 
         // Try to link node at the end of the linked list
         if (tp::from_tagged_ptr<Node>(tail)->next_ptr.compare_exchange_strong(tmp, tp::combine_and_increment(new_node, next), std::memory_order_release )) { break; }
+
+        std::this_thread::yield();  // Back-off
     }
     // Enqueue is done. Try to swing tail to the inserted node
     m_tail_ptr.compare_exchange_strong( tail, tp::combine_and_increment(new_node, tail), std::memory_order_acq_rel );
@@ -122,6 +124,7 @@ std::optional<T> MpscQueue<T>::try_dequeue() {
         if (m_head_ptr.compare_exchange_strong(head, inc_next, std::memory_order_release)) {
             break;
         }
+        std::this_thread::yield();  // Back-off
     }
     --m_size;
     dispose_node(tp::from_tagged_ptr<Node>(head));

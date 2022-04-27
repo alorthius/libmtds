@@ -18,7 +18,7 @@ public:
     FreeList(const FreeList&) = delete;
     FreeList& operator=(const FreeList&) = delete;
 
-    template<typename U> void push(U&& value);
+    template<typename U> void push(U&& node_ptr);
 
 private:
     using tagged_ptr = tp::tagged_ptr;
@@ -29,8 +29,8 @@ private:
 
 template<typename T>
 template<typename U>
-void FreeList<T>::push(U &&value) {
-    auto new_node = tp::to_tagged_ptr( new Node{std::forward<U>(value)} );
+void FreeList<T>::push(U&& node_ptr) {
+    auto new_node = tp::to_tagged_ptr(node_ptr);
     auto top = m_top_ptr.load(std::memory_order_relaxed);
 
     while (true) {
@@ -39,6 +39,8 @@ void FreeList<T>::push(U &&value) {
                                              std::memory_order_release, std::memory_order_acquire )) {
             return;
         }
+
+        std::this_thread::yield();  // Back-off
     }
 }
 
@@ -46,7 +48,6 @@ template<typename T>
 FreeList<T>::~FreeList() {
     auto top = m_top_ptr.load(std::memory_order_relaxed);
     while (tp::from_tagged_ptr<Node>(top) != nullptr) {
-        delete tp::from_tagged_ptr<Node>(top)->value;
         auto next = tp::from_tagged_ptr<Node>(top)->next_ptr.load(std::memory_order_relaxed);
         delete tp::from_tagged_ptr<Node>(top);
         top = next;
