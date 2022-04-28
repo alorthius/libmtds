@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 #include "container_tests.hpp"
-#include "mpsc_stack.hpp"
+#include "mtds/mpsc_stack.hpp"
 
 constexpr size_t NUM_PRODUCERS = 4;
 constexpr size_t NUM_CONSUMERS = 1;

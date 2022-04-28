@@ -1,8 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#ifndef MTDSLIB_TAGGED_PTR_HPP
-#define MTDSLIB_TAGGED_PTR_HPP
+#ifndef MTDS_TAGGED_PTR_HPP
+#define MTDS_TAGGED_PTR_HPP
 
 #ifdef _MSC_VER
 #define FORCE_INLINE __forceinline
@@ -54,4 +54,4 @@ T* from_tagged_ptr(tagged_ptr ptr) {
 
 #undef FORCE_INLINE
 
-#endif //MTDSLIB_TAGGED_PTR_HPP
+#endif //MTDS_TAGGED_PTR_HPP

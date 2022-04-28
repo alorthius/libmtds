@@ -55,36 +55,32 @@ include(cmake/CompilerWarnings.cmake)
 # Project files, packages, libraries and so on
 ##########################################################
 
+set(detail_header_files
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/details/free_list.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/details/tagged_ptr.hpp)
+
+set(header_files
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpmc_queue.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpmc_stack.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpsc_queue.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpsc_stack.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mutex_queue.hpp)
+
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} src/main.cpp mtds_lib/mutex_queue.hpp mtds_lib/mpsc_queue.hpp
-		mtds_lib/details/tagged_ptr.hpp mtds_lib/mpsc_stack.hpp mtds_lib/mpmc_queue.hpp mtds_lib/mpmc_stack.hpp)
+add_executable(${PROJECT_NAME} src/main.cpp)
 
 #! Put path to your project headers
-target_include_directories(${PROJECT_NAME} PRIVATE mtds_lib)
+target_include_directories(${PROJECT_NAME} PRIVATE include/)
 
-add_library(
-		${LIB_NAME} SHARED
-		${CMAKE_SOURCE_DIR}/mtds_lib/mutex_queue.hpp mtds_lib/mpsc_queue.hpp
-		mtds_lib/details/tagged_ptr.hpp mtds_lib/mpsc_stack.hpp mtds_lib/details/free_list.hpp mtds_lib/mpmc_queue.hpp mtds_lib/mpmc_stack.hpp)
-
-target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/mtds_lib)
+add_library(${LIB_NAME} INTERFACE)
+target_sources(${LIB_NAME} INTERFACE "$<BUILD_INTERFACE:${detail_header_files};${header_files}>")
+target_include_directories(${LIB_NAME} INTERFACE include/)
 
 ##########################################################
 
 target_link_libraries(${PROJECT_NAME} ${LIB_NAME})
 
 ##########################################################
-
-#! Specify output directories
-#! For different tests etc it should be `bin`. For shared library it should be `lib`
-set_target_properties(${LIB_NAME} ${PROJECT_NAME}
-		PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-set_target_properties(${LIB_NAME}
-		PROPERTIES
-		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
-		ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
-		LINKER_LANGUAGE CXX)
 
 #! Add external packages
 find_package(Threads REQUIRED)
@@ -105,83 +101,19 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(
+set(test_targets
 		mutex_queue_test
-		test/mutex_queue_test.cpp
-		mtds_lib/mutex_queue.hpp test/container_tests.hpp)
-
-target_include_directories(mutex_queue_test PRIVATE mtds_lib test)
-
-target_link_libraries(
-		mutex_queue_test
-		gtest_main
-		Threads::Threads
-)
-
-add_executable(
 		mpsc_queue_test
-		test/mpsc_queue_test.cpp
-		mtds_lib/mpsc_queue.hpp test/container_tests.hpp)
-
-target_include_directories(mpsc_queue_test PRIVATE mtds_lib test)
-
-target_link_libraries(
-		mpsc_queue_test
-		gtest_main
-		Threads::Threads
-)
-
-add_executable(
 		mpmc_queue_test
-		test/mpmc_queue_test.cpp
-		mtds_lib/mpmc_queue.hpp test/container_tests.hpp)
-
-target_include_directories(mpmc_queue_test PRIVATE mtds_lib test)
-
-target_link_libraries(
-		mpmc_queue_test
-		gtest_main
-		Threads::Threads
-)
-
-add_executable(
 		mpsc_stack_test
-		test/mpsc_stack_test.cpp
-		mtds_lib/mpsc_stack.hpp test/container_tests.hpp)
-
-target_include_directories(mpsc_stack_test PRIVATE mtds_lib test)
-
-target_link_libraries(
-		mpsc_stack_test
-		gtest_main
-		Threads::Threads
-)
-
-add_executable(
 		mpmc_stack_test
-		test/mpmc_stack_test.cpp
-		mtds_lib/mpmc_stack.hpp test/container_tests.hpp)
+		free_list_test)
 
-target_include_directories(mpmc_stack_test PRIVATE mtds_lib test)
-
-target_link_libraries(
-		mpmc_stack_test
-		gtest_main
-		Threads::Threads
-)
-
-add_executable(
-		free_list_test
-		test/free_list_test.cpp
-		mtds_lib/details/free_list.hpp test/container_tests.hpp)
-
-target_include_directories(free_list_test PRIVATE mtds_lib test)
-
-target_link_libraries(
-		free_list_test
-		gtest_main
-		Threads::Threads
-)
+foreach(target ${test_targets})
+	add_executable(${target} test/${target}.cpp)
+	target_include_directories(${target} PRIVATE include/ test)
+	target_link_libraries(${target} gtest_main Threads::Threads)
+endforeach(target)
 
 include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME})
@@ -193,27 +125,23 @@ find_package(benchmark REQUIRED)
 
 add_executable(
 		mtds_benchmark
-		mtds_lib/mutex_queue.hpp
-		mtds_lib/mpmc_queue.hpp
-		mtds_lib/mpsc_queue.hpp
 		benchmark/mtds_benchmark.cpp)
 
 target_link_libraries(mtds_benchmark benchmark::benchmark)
 
-target_include_directories(mtds_benchmark PRIVATE benchmark mtds_lib)
+target_include_directories(mtds_benchmark PRIVATE benchmark include/)
 
 ##########################################################
 # Fixed CMakeLists.txt part
 ##########################################################
 
-INSTALL(PROGRAMS
+install(PROGRAMS
 		$<TARGET_FILE:${PROJECT_NAME}>	# ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
 		$<TARGET_FILE:mtds_benchmark>
 		DESTINATION bin)
 
 # Define ALL_TARGETS variable to use in PVS and Sanitizers
-set(ALL_TARGETS ${PROJECT_NAME} mutex_queue_test mpsc_queue_test mpmc_queue_test mpsc_stack_test
-		mpmc_stack_test free_list_test)
+set(ALL_TARGETS ${PROJECT_NAME} ${test_targets})
 
 # Include CMake setup
 include(cmake/main-config.cmake)

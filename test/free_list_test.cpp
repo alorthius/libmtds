@@ -4,8 +4,8 @@
 #include <gtest/gtest.h>
 #include <thread>
 #include <random>
-#include "details/tagged_ptr.hpp"
-#include "details/free_list.hpp"
+#include "mtds/details/tagged_ptr.hpp"
+#include "mtds/details/free_list.hpp"
 
 constexpr size_t NUM_PRODUCERS = 4;
 constexpr size_t NUM_OPERATIONS = 10e4;

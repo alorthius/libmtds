@@ -1,8 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#ifndef MTDSLIB_FREE_LIST_HPP
-#define MTDSLIB_FREE_LIST_HPP
+#ifndef MTDS_FREE_LIST_HPP
+#define MTDS_FREE_LIST_HPP
 
 #include <cstddef>
 #include <atomic>
@@ -57,4 +57,4 @@ FreeList<T>::~FreeList() {
 
 }  // namespace mtds::tp
 
-#endif //MTDSLIB_FREE_LIST_HPP
+#endif //MTDS_FREE_LIST_HPP

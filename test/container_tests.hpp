@@ -1,8 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#ifndef LIBMTDS_CONTAINER_TESTS_HPP
-#define LIBMTDS_CONTAINER_TESTS_HPP
+#ifndef MTDS_CONTAINER_TESTS_HPP
+#define MTDS_CONTAINER_TESTS_HPP
 
 #include <random>
 #include <thread>
@@ -105,4 +105,4 @@ int producer_consumer_test(C& container, size_t num_producers,
     return std::accumulate(sums.begin(), sums.end(), 0);
 }
 
-#endif //LIBMTDS_CONTAINER_TESTS_HPP
+#endif //MTDS_CONTAINER_TESTS_HPP
