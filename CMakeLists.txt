@@ -56,14 +56,11 @@ include(cmake/CompilerWarnings.cmake)
 ##########################################################
 
 set(detail_header_files
-		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/details/free_list.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/details/tagged_ptr.hpp)
 
 set(header_files
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpmc_queue.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpmc_stack.hpp
-		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpsc_queue.hpp
-		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpsc_stack.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mutex_queue.hpp)
 
 #! Project main executable source compilation
@@ -103,11 +100,8 @@ enable_testing()
 
 set(test_targets
 		mutex_queue_test
-		mpsc_queue_test
 		mpmc_queue_test
-		mpsc_stack_test
-		mpmc_stack_test
-		free_list_test)
+		mpmc_stack_test)
 
 foreach(target ${test_targets})
 	add_executable(${target} test/${target}.cpp)
