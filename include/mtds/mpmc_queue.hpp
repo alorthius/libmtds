@@ -77,9 +77,6 @@ void MpmcQueue<T>::enqueue(U&& value) {
         auto next = tp::from_tagged_ptr<Node>(tail)->next_ptr.load(
                 std::memory_order_acquire);
 
-        // Is tail still consistent?
-        if (tail != m_tail_ptr) { continue; }
-
         // m_tail_ptr not pointing to the last node
         if (next != tp::tagged_nullptr) {
             // Try to swing m_tail_ptr to the next node
