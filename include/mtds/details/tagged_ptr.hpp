@@ -4,45 +4,53 @@
 #ifndef MTDS_TAGGED_PTR_HPP
 #define MTDS_TAGGED_PTR_HPP
 
-#ifdef _MSC_VER
-#define FORCE_INLINE __forceinline
-#elif defined(__GNUC__) || defined(__clang__)
-#define FORCE_INLINE inline __attribute__((__always_inline__))
-#else
-#define FORCE_INLINE inline
-#endif
+namespace mtds::tagged_ptr {
 
-namespace mtds::tp {
+/*
+ * 12 upper and 2 lower bits of a 64-bit pointer are used to store the tag which is incremented
+ * every successful CAS operation
+ */
+template<typename T>
+class TaggedPtr {
+public:
+    TaggedPtr() = default;
 
-using tagged_ptr = uintptr_t;
+    explicit TaggedPtr(T* ptr) {
+        m_ptr = reinterpret_cast<uintptr_t>(ptr);
+    }
 
-constexpr tagged_ptr tagged_nullptr = 0;
+    TaggedPtr(T* ptr, size_t tag) {
+        m_ptr = (0x000ffffffffffffc & reinterpret_cast<uintptr_t>(ptr))
+                | (0xfff0000000000003U & tag);
+    }
+
+    T* ptr() {
+        return reinterpret_cast<T*>(0x000ffffffffffffc & m_ptr);
+    }
+
+    size_t tag() {
+        return (0x3ffc & m_ptr >> 50) | (0b11 & m_ptr);
+    }
+
+    template<typename U>
+    bool operator==(const TaggedPtr<U>& rhs) {
+        return m_ptr == rhs.m_ptr;
+    }
+
+    template<typename U>
+    bool operator!=(const TaggedPtr<U>& rhs) {
+        return !(*this == rhs);
+    }
+
+private:
+    uintptr_t m_ptr = reinterpret_cast<uintptr_t>(nullptr);
+};
 
 template<typename T>
 struct Node {
     T value{};
-    std::atomic<tagged_ptr> next_ptr = tagged_nullptr;
+    std::atomic<TaggedPtr<Node<T>>> next_ptr{};
 };
-
-FORCE_INLINE tagged_ptr increment(tagged_ptr ptr) {
-    auto inc_tag = ((0x3ffc & ptr >> 50) | (0b11 & ptr)) + 1;
-    return ((0x3ffc & inc_tag) << 50) | (0b11 & inc_tag) | (0x000ffffffffffffc & ptr);
-}
-
-FORCE_INLINE tagged_ptr combine_and_increment(tagged_ptr ptr, tagged_ptr tag) {
-    auto inc_tag = increment(tag);
-    return (0x000ffffffffffffc & ptr) | (0xfff0000000000003U & inc_tag);
-}
-
-template<typename T>
-tagged_ptr to_tagged_ptr(T ptr) {
-    return reinterpret_cast<tagged_ptr>(ptr);
-}
-
-template<typename T>
-T* from_tagged_ptr(tagged_ptr ptr) {
-    return reinterpret_cast<T*>(0x000ffffffffffffc & ptr);
-}
 
 }  // namespace mtds::details
 
