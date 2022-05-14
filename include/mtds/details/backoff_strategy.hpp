@@ -1,5 +1,5 @@
-#ifndef MTDS_EXAMPLE_BACKOFF_STRATEGY_HPP
-#define MTDS_EXAMPLE_BACKOFF_STRATEGY_HPP
+#ifndef MTDS_BACKOFF_STRATEGY_HPP
+#define MTDS_BACKOFF_STRATEGY_HPP
 
 #include <cstddef>
 #include <thread>
@@ -46,4 +46,4 @@ private:
 
 }
 
-#endif //MTDS_EXAMPLE_BACKOFF_STRATEGY_HPP
+#endif //MTDS_BACKOFF_STRATEGY_HPP
