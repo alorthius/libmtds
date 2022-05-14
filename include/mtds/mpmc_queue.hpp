@@ -93,8 +93,8 @@ void MpmcQueue<T, backoffType>::enqueue(U&& value) {
         backoff();
     }
     // Enqueue is done. Try to swing tail to the inserted node
-    m_tail_ptr.compare_exchange_strong(tail, TaggedPtr{new_node.ptr(), tail.tag() + 1}, std::memory_order_acq_rel );
-    ++m_size;
+    m_tail_ptr.compare_exchange_strong(tail, TaggedPtr{new_node.ptr(), tail.tag() + 1}, std::memory_order_release );
+    m_size.fetch_add(1, std::memory_order_relaxed);
 }
 
 template<typename T, typename backoffType>
@@ -113,23 +113,25 @@ std::optional<T> MpmcQueue<T, backoffType>::try_dequeue() {
         if (next.ptr() == nullptr) {
             return {};
         }
-        auto tail = m_tail_ptr.load(std::memory_order_relaxed);
+        auto tail = m_tail_ptr.load(std::memory_order_acquire);
         // Is m_tail_ptr falling behind?
         if (head == tail) {
-            m_tail_ptr.compare_exchange_strong(tail, TaggedPtr{next.ptr(), tail.tag() + 1},
-                                               std::memory_order_release);
+            m_tail_ptr.compare_exchange_strong(
+                    tail, TaggedPtr{next.ptr(), tail.tag() + 1},
+                    std::memory_order_release, std::memory_order_relaxed);
             continue;
         }
         // Read value before CAS, otherwise another dequeue might free the next node
         value = next.ptr()->value;
         // Try to swing m_head_ptr to the next node
-        if (m_head_ptr.compare_exchange_strong(head, TaggedPtr{next.ptr(), head.tag() + 1},
-                                               std::memory_order_release)) {
+        if (m_head_ptr.compare_exchange_strong(
+                head, TaggedPtr{next.ptr(), head.tag() + 1},
+                std::memory_order_acquire, std::memory_order_relaxed)) {
             break;
         }
         backoff();
     }
-    --m_size;
+    m_size.fetch_sub(1, std::memory_order_relaxed);
     delete head.ptr();
     return value;
 }
@@ -145,9 +147,19 @@ T MpmcQueue<T, backoffType>::dequeue() {
 
 template<typename T, typename backoffType>
 bool MpmcQueue<T, backoffType>::empty() const {
-    auto head = m_head_ptr.load(std::memory_order_acquire);
-    auto next = head.ptr()->next_ptr.load(std::memory_order_relaxed);
-    return next.ptr() == nullptr;
+    while (true) {
+        auto head = m_head_ptr.load(std::memory_order_acquire);
+        // Is head consistent?
+        if (head != m_head_ptr.load(std::memory_order_acquire)) {
+            continue;
+        }
+        auto next = head.ptr()->next_ptr.load(std::memory_order_relaxed);
+        // Is next consistent?
+        if (next != head.ptr()->next_ptr.load(std::memory_order_relaxed)) {
+            continue;
+        }
+        return next.ptr() == nullptr;
+    }
 }
 
 }  // namespace mtds
