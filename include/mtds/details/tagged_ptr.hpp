@@ -19,7 +19,11 @@ public:
         m_ptr = reinterpret_cast<uintptr_t>(ptr);
     }
 
-    TaggedPtr(T* ptr, size_t tag) {
+    TaggedPtr(T* ptr, unsigned tag) {
+        if (tag >= std::pow(2, 14)) {  // Tag is 14-bit
+            throw std::overflow_error{"Tag overflow"};
+        }
+
         m_ptr = (0x000ffffffffffffc & reinterpret_cast<uintptr_t>(ptr))
                 | (0xfff0000000000003U & tag);
     }
@@ -28,7 +32,7 @@ public:
         return reinterpret_cast<T*>(0x000ffffffffffffc & m_ptr);
     }
 
-    size_t tag() {
+    unsigned tag() {
         return (0x3ffc & m_ptr >> 50) | (0b11 & m_ptr);
     }
 
