@@ -3,13 +3,13 @@
 
 #include <gtest/gtest.h>
 #include "container_tests.hpp"
-#include "mtds/mutex_queue.hpp"
+#include "mtds/two_mutex_queue.hpp"
 
 constexpr size_t NUM_PRODUCERS = 4;
 constexpr size_t NUM_CONSUMERS = 4;
-constexpr size_t NUM_OPERATIONS = 1e6;
+constexpr size_t NUM_OPERATIONS = 1e4;
 
-class MutexQueueTest : public ::testing::Test {
+class TwoMutexQueueTest : public ::testing::Test {
 protected:
     void SetUp() override {
         c1.push(1);
@@ -17,12 +17,12 @@ protected:
         c2.push(3);
     }
 
-    mtds::MutexQueue<int> c0;
-    mtds::MutexQueue<int> c1;
-    mtds::MutexQueue<int> c2;
+    mtds::TwoMutexQueue<int> c0;
+    mtds::TwoMutexQueue<int> c1;
+    mtds::TwoMutexQueue<int> c2;
 };
 
-TEST_F(MutexQueueTest, IsEmptyInitially) {
+TEST_F(TwoMutexQueueTest, IsEmptyInitially) {
     EXPECT_EQ(c0.size(), 0);
     EXPECT_TRUE(c0.empty());
 
@@ -30,7 +30,7 @@ TEST_F(MutexQueueTest, IsEmptyInitially) {
     EXPECT_FALSE(c1.empty());
 }
 
-TEST_F(MutexQueueTest, TryDequeueWorks) {
+TEST_F(TwoMutexQueueTest, TryDequeueWorks) {
     EXPECT_FALSE(c0.try_pop().has_value());
 
     auto value = c1.try_pop();
@@ -44,18 +44,18 @@ TEST_F(MutexQueueTest, TryDequeueWorks) {
     EXPECT_EQ(c2.size(), 1);
 }
 
-TEST_F(MutexQueueTest, ClearWorks) {
+TEST_F(TwoMutexQueueTest, ClearWorks) {
     c2.clear();
     EXPECT_EQ(c2.size(), 0);
     EXPECT_TRUE(c2.empty());
 }
 
-TEST_F(MutexQueueTest, EnduranceTest) {
+TEST_F(TwoMutexQueueTest, EnduranceTest) {
     auto sum = endurance_test(c0, std::min(NUM_PRODUCERS, NUM_CONSUMERS), NUM_OPERATIONS);
     EXPECT_EQ(sum, NUM_OPERATIONS);
 }
 
-TEST_F(MutexQueueTest, ProducerConsumerTest) {
+TEST_F(TwoMutexQueueTest, ProducerConsumerTest) {
     auto sum = producer_consumer_test(c0, NUM_PRODUCERS, NUM_CONSUMERS, NUM_OPERATIONS);
     EXPECT_EQ(sum, NUM_OPERATIONS);
 }

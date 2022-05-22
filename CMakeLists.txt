@@ -64,7 +64,8 @@ set(header_files
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpmc_stack.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpsc_queue.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpsc_stack.hpp
-		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mutex_queue.hpp)
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mutex_queue.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/two_mutex_queue.hpp)
 
 #! Project main executable source compilation
 add_executable(${PROJECT_NAME} src/main.cpp)
@@ -102,6 +103,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 set(test_targets
+		two_mutex_queue_test
 		mutex_queue_test
 		mpsc_queue_test
 		mpmc_queue_test
