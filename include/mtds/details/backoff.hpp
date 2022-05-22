@@ -1,10 +1,10 @@
-#ifndef MTDS_EXAMPLE_BACK_OFF_HPP
-#define MTDS_EXAMPLE_BACK_OFF_HPP
+#ifndef MTDS_EXAMPLE_BACKOFF_HPP
+#define MTDS_EXAMPLE_BACKOFF_HPP
 
 #include <cstddef>
 #include <thread>
 
-namespace mtds::back_off {
+namespace mtds::backoff {
 
     class exp_backoff {
     public:
@@ -46,6 +46,6 @@ namespace mtds::back_off {
         size_t current;
     };
 
-}  // namespace mtds::back_off
+}  // namespace mtds::backoff
 
-#endif //MTDS_EXAMPLE_BACK_OFF_HPP
+#endif //MTDS_EXAMPLE_BACKOFF_HPP
