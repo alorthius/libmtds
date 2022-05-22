@@ -2,9 +2,9 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include <benchmark/benchmark.h>
-#include "mutex_queue.hpp"
-#include "mpmc_queue.hpp"
-#include "mpsc_queue.hpp"
+#include "mtds/mutex_queue.hpp"
+#include "mtds/mpmc_queue.hpp"
+#include "mtds/mpsc_queue.hpp"
 
 struct MyPair {
     int first;

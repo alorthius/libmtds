@@ -1,3 +1,10 @@
+# Other
+.DS_Store
+.vscode
+
+# Compilation dirs
+lib
+
 # GoogleTest
 include/gmock
 include/gtest
