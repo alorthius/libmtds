@@ -57,7 +57,7 @@ include(cmake/CompilerWarnings.cmake)
 
 set(detail_header_files
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/details/tagged_ptr.hpp
-		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/details/backoff_strategy.hpp)
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/details/back_off.hpp)
 
 set(header_files
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpmc_queue.hpp

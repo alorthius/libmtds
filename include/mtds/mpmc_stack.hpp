@@ -8,10 +8,11 @@
 #include <optional>
 #include <thread>
 #include "details/tagged_ptr.hpp"
+#include "details/back_off.hpp"
 
 namespace mtds {
 
-template<typename T>
+template<typename T, typename BackoffType = back_off::exp_backoff>
 class MpmcStack {
 public:
     using value_type = T;
@@ -42,9 +43,11 @@ private:
     virtual void dispose_node(Node* node_ptr) { delete node_ptr; }
 };
 
-template<typename T>
+template<typename T, typename BackoffType>
 template<typename U>
-void MpmcStack<T>::push(U &&value) {
+void MpmcStack<T, BackoffType>::push(U &&value) {
+    BackoffType backoff;
+
     auto new_node = tp::to_tagged_ptr( new Node{std::forward<U>(value)} );
     auto top = m_top_ptr.load(std::memory_order_relaxed);
 
@@ -55,13 +58,14 @@ void MpmcStack<T>::push(U &&value) {
             ++m_size;
             return;
         }
-
-        std::this_thread::yield();  // Back-off
+        backoff();
     }
 }
 
-template<typename T>
-std::optional<T> MpmcStack<T>::try_pop() {
+template<typename T, typename BackoffType>
+std::optional<T> MpmcStack<T, BackoffType>::try_pop() {
+    BackoffType backoff;
+
     while (true) {
         auto top = m_top_ptr.load(std::memory_order_acquire);
         // Is stack empty?
@@ -77,12 +81,12 @@ std::optional<T> MpmcStack<T>::try_pop() {
             dispose_node(tp::from_tagged_ptr<Node>(top));
             return value;
         }
-        std::this_thread::yield();  // Back-off
+        backoff();
     }
 }
 
-template<typename T>
-T MpmcStack<T>::pop() {
+    template<typename T, typename BackoffType>
+T MpmcStack<T, BackoffType>::pop() {
     std::optional<T> temp;
     do {
         temp = try_pop();

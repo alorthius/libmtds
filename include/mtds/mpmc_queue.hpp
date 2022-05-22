@@ -8,11 +8,11 @@
 #include <optional>
 #include <thread>
 #include "details/tagged_ptr.hpp"
-#include "details/backoff_strategy.hpp"
+#include "details/back_off.hpp"
 
 namespace mtds {
 
-template<typename T, typename backoffType = bos::exp_backoff>
+template<typename T, typename BackoffType = back_off::exp_backoff>
 class MpmcQueue {
 public:
     using value_type = T;
@@ -47,15 +47,15 @@ private:
     virtual void dispose_node(Node* node_ptr) { delete node_ptr; }
 };
 
-template<typename T, typename backoffType>
-MpmcQueue<T, backoffType>::MpmcQueue() {
+template<typename T, typename BackoffType>
+MpmcQueue<T, BackoffType>::MpmcQueue() {
     auto dummy_node = tp::to_tagged_ptr(new Node{});
     m_head_ptr.store(dummy_node, std::memory_order_release);
     m_tail_ptr.store(dummy_node, std::memory_order_release);
 }
 
-template<typename T, typename backoffType>
-MpmcQueue<T, backoffType>::~MpmcQueue() {
+template<typename T, typename BackoffType>
+MpmcQueue<T, BackoffType>::~MpmcQueue() {
     clear();
     auto head = m_head_ptr.load(std::memory_order_relaxed);
     m_head_ptr.store(tp::tagged_nullptr, std::memory_order_relaxed);
@@ -63,10 +63,11 @@ MpmcQueue<T, backoffType>::~MpmcQueue() {
     delete tp::from_tagged_ptr<Node>(head);
 }
 
-template<typename T, typename backoffType>
+template<typename T, typename BackoffType>
 template<typename U>
-void MpmcQueue<T, backoffType>::enqueue(U&& value) {
-    backoffType backoff;
+void MpmcQueue<T, BackoffType>::enqueue(U&& value) {
+    BackoffType backoff;
+
     auto new_node = tp::to_tagged_ptr(new Node{std::forward<U>(value)});
     tagged_ptr tail;
 
@@ -99,9 +100,10 @@ void MpmcQueue<T, backoffType>::enqueue(U&& value) {
     ++m_size;
 }
 
-template<typename T, typename backoffType>
-std::optional<T> MpmcQueue<T, backoffType>::try_dequeue() {
-    backoffType backoff;
+template<typename T, typename BackoffType>
+std::optional<T> MpmcQueue<T, BackoffType>::try_dequeue() {
+    BackoffType backoff;
+
     tagged_ptr head, next;
     while (true) {
         head = m_head_ptr.load(std::memory_order_acquire);
@@ -132,8 +134,8 @@ std::optional<T> MpmcQueue<T, backoffType>::try_dequeue() {
     return tp::from_tagged_ptr<Node>(next)->value;
 }
 
-template<typename T, typename backoffType>
-T MpmcQueue<T, backoffType>::dequeue() {
+template<typename T, typename BackoffType>
+T MpmcQueue<T, BackoffType>::dequeue() {
     std::optional<T> temp;
     do {
         temp = try_dequeue();
@@ -141,8 +143,8 @@ T MpmcQueue<T, backoffType>::dequeue() {
     return *temp;
 }
 
-template<typename T, typename backoffType>
-bool MpmcQueue<T, backoffType>::empty() const {
+template<typename T, typename BackoffType>
+bool MpmcQueue<T, BackoffType>::empty() const {
     auto head = m_head_ptr.load(std::memory_order_acquire);
     auto next = tp::from_tagged_ptr<Node>(head)->next_ptr.load(std::memory_order_relaxed);
     return next == tp::tagged_nullptr;
