@@ -4,6 +4,8 @@
 #ifndef MTDS_TAGGED_PTR_HPP
 #define MTDS_TAGGED_PTR_HPP
 
+#include <cmath>
+
 namespace mtds::tagged_ptr {
 
 /*
