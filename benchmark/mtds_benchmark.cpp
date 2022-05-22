@@ -85,8 +85,10 @@ template <typename Q, typename T = typename Q::value_type> void BM_EnqueueDequeu
     BENCHMARK(BM_EnqueueDequeueOnce< mtds::MpscQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
     BENCHMARK(BM_EnqueueDequeueOnce< mtds::MpmcQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();
 
-TEST_ON_TYPE(int);
-TEST_ON_TYPE(std::string);
-TEST_ON_TYPE(MyPair);
+// TEST_ON_TYPE(int);
+// TEST_ON_TYPE(std::string);
+// TEST_ON_TYPE(MyPair);
+
+BENCHMARK(BM_EnqueueDequeueOnce< mtds::MpmcQueue <int> >)->Arg(1'000'000)->Threads(16)->Unit(benchmark::kMillisecond)->UseRealTime();
 
 BENCHMARK_MAIN();
