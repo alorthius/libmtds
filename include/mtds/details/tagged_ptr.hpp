@@ -5,6 +5,7 @@
 #define MTDS_TAGGED_PTR_HPP
 
 #include <cmath>
+#include <stdexcept>
 
 namespace mtds::tagged_ptr {
 
