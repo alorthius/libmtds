@@ -8,11 +8,11 @@
 #include <optional>
 #include <thread>
 #include "details/tagged_ptr.hpp"
-#include "details/backoff_strategy.hpp"
+#include "details/backoff.hpp"
 
 namespace mtds {
 
-template<typename T, typename Backoff = bos::exp_backoff>
+template<typename T, typename Backoff = backoff::exp_backoff>
 class MpmcStack {
 public:
     using value_type = T;
@@ -45,6 +45,7 @@ template<typename T, typename Backoff>
 template<typename U>
 void MpmcStack<T, Backoff>::push(U &&value) {
     Backoff backoff;
+
     TaggedPtr new_node{new Node{std::forward<U>(value)}};
     auto top = m_top_ptr.load(std::memory_order_relaxed);
 
@@ -55,7 +56,6 @@ void MpmcStack<T, Backoff>::push(U &&value) {
             ++m_size;
             return;
         }
-
         backoff();
     }
 }
