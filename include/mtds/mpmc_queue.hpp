@@ -48,6 +48,7 @@ private:
 template<typename T, typename backoffType>
 MpmcQueue<T, backoffType>::MpmcQueue() {
     TaggedPtr dummy_node{new Node{}};
+
     m_head_ptr.store(dummy_node, std::memory_order_release);
     m_tail_ptr.store(dummy_node, std::memory_order_release);
 }
@@ -55,10 +56,12 @@ MpmcQueue<T, backoffType>::MpmcQueue() {
 template<typename T, typename backoffType>
 MpmcQueue<T, backoffType>::~MpmcQueue() {
     clear();
+
     auto head = m_head_ptr.load(std::memory_order_relaxed);
     m_head_ptr.store(TaggedPtr{}, std::memory_order_relaxed);
     m_tail_ptr.store(TaggedPtr{}, std::memory_order_relaxed);
-    delete head.ptr();
+
+    delete head.ptr();  // Free the dummy node
 }
 
 template<typename T, typename backoffType>
@@ -102,9 +105,11 @@ std::optional<T> MpmcQueue<T, backoffType>::try_dequeue() {
     backoffType backoff;
     TaggedPtr head, next;
     T value;
+
     while (true) {
         head = m_head_ptr.load(std::memory_order_acquire);
         next = head.ptr()->next_ptr.load(std::memory_order_acquire);
+
         // Is head consistent?
         if (head != m_head_ptr.load(std::memory_order_acquire)) {
             continue;
@@ -114,6 +119,7 @@ std::optional<T> MpmcQueue<T, backoffType>::try_dequeue() {
             return {};
         }
         auto tail = m_tail_ptr.load(std::memory_order_acquire);
+
         // Is m_tail_ptr falling behind?
         if (head == tail) {
             m_tail_ptr.compare_exchange_strong(
@@ -123,6 +129,7 @@ std::optional<T> MpmcQueue<T, backoffType>::try_dequeue() {
         }
         // Read value before CAS, otherwise another dequeue might free the next node
         value = next.ptr()->value;
+
         // Try to swing m_head_ptr to the next node
         if (m_head_ptr.compare_exchange_strong(
                 head, TaggedPtr{next.ptr(), head.tag() + 1},
@@ -133,6 +140,7 @@ std::optional<T> MpmcQueue<T, backoffType>::try_dequeue() {
     }
     m_size.fetch_sub(1, std::memory_order_relaxed);
     delete head.ptr();
+
     return value;
 }
 
@@ -142,6 +150,7 @@ T MpmcQueue<T, backoffType>::dequeue() {
     do {
         temp = try_dequeue();
     } while (!temp);
+
     return *temp;
 }
 
@@ -149,11 +158,13 @@ template<typename T, typename backoffType>
 bool MpmcQueue<T, backoffType>::empty() const {
     while (true) {
         auto head = m_head_ptr.load(std::memory_order_acquire);
+
         // Is head consistent?
         if (head != m_head_ptr.load(std::memory_order_acquire)) {
             continue;
         }
         auto next = head.ptr()->next_ptr.load(std::memory_order_relaxed);
+
         // Is next consistent?
         if (next != head.ptr()->next_ptr.load(std::memory_order_relaxed)) {
             continue;
