@@ -133,7 +133,7 @@ std::optional<T> MpmcQueue<T, Backoff>::try_dequeue() {
         // Try to swing m_head_ptr to the next node
         if (m_head_ptr.compare_exchange_strong(
                 head, TaggedPtr{next.ptr(), head.tag() + 1},
-                std::memory_order_acquire, std::memory_order_relaxed)) {
+                std::memory_order_release, std::memory_order_relaxed)) {
             break;
         }
         backoff();
