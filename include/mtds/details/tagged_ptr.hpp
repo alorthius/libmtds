@@ -7,6 +7,14 @@
 #include <cmath>
 #include <stdexcept>
 
+#ifdef _MSC_VER
+#define FORCE_INLINE __forceinline
+#elif defined(__GNUC__) || defined(__clang__)
+#define FORCE_INLINE inline __attribute__((__always_inline__))
+#else
+#define FORCE_INLINE inline
+#endif
+
 namespace mtds::tagged_ptr {
 
 /*
@@ -16,36 +24,35 @@ namespace mtds::tagged_ptr {
 template<typename T>
 class TaggedPtr {
 public:
-    TaggedPtr() = default;
+    FORCE_INLINE TaggedPtr() = default;
 
-    explicit TaggedPtr(T* ptr) {
+    FORCE_INLINE explicit TaggedPtr(T* ptr) {
         m_ptr = reinterpret_cast<uintptr_t>(ptr);
     }
 
-    TaggedPtr(T* ptr, unsigned tag) {
+    FORCE_INLINE TaggedPtr(T* ptr, unsigned tag) {
         if (tag >= std::pow(2, 14)) {  // Tag is 14-bit
             throw std::overflow_error{"Tag overflow"};
         }
-
         m_ptr = (0x000ffffffffffffc & reinterpret_cast<uintptr_t>(ptr))
                 | (0xfff0000000000003U & tag);
     }
 
-    T* ptr() {
+    FORCE_INLINE T* ptr() {
         return reinterpret_cast<T*>(0x000ffffffffffffc & m_ptr);
     }
 
-    unsigned tag() {
+    FORCE_INLINE unsigned tag() {
         return (0x3ffc & m_ptr >> 50) | (0b11 & m_ptr);
     }
 
     template<typename U>
-    bool operator==(const TaggedPtr<U>& rhs) {
+    FORCE_INLINE bool operator==(const TaggedPtr<U>& rhs) {
         return m_ptr == rhs.m_ptr;
     }
 
     template<typename U>
-    bool operator!=(const TaggedPtr<U>& rhs) {
+    FORCE_INLINE bool operator!=(const TaggedPtr<U>& rhs) {
         return !(*this == rhs);
     }
 
