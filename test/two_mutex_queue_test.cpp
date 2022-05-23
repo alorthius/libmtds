@@ -23,11 +23,9 @@ protected:
 };
 
 TEST_F(TwoMutexQueueTest, IsEmptyInitially) {
-    EXPECT_EQ(c0.size(), 0);
     EXPECT_TRUE(c0.empty());
-
-    EXPECT_NE(c1.size(), 0);
     EXPECT_FALSE(c1.empty());
+    EXPECT_FALSE(c2.empty());
 }
 
 TEST_F(TwoMutexQueueTest, TryDequeueWorks) {
@@ -36,17 +34,16 @@ TEST_F(TwoMutexQueueTest, TryDequeueWorks) {
     auto value = c1.try_pop();
     ASSERT_TRUE(value.has_value());
     EXPECT_EQ(value, 1);
-    EXPECT_EQ(c1.size(), 0);
+    EXPECT_TRUE(c1.empty());
 
     value = c2.try_pop();
     ASSERT_TRUE(value.has_value());
     EXPECT_EQ(value, 2);
-    EXPECT_EQ(c2.size(), 1);
+    EXPECT_FALSE(c2.empty());
 }
 
 TEST_F(TwoMutexQueueTest, ClearWorks) {
     c2.clear();
-    EXPECT_EQ(c2.size(), 0);
     EXPECT_TRUE(c2.empty());
 }
 

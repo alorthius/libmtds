@@ -75,6 +75,32 @@ template <typename Q, typename T = typename Q::value_type> void BM_EnqueueDequeu
     }
 }
 
+template <typename Q, typename T = typename Q::value_type> void BM_EnqueueOnceDequeue(benchmark::State& state) {
+    static Q queue;
+
+    if (state.thread_index() == 0) {
+        queue.clear();
+    }
+
+    if (state.thread_index() == 0) {
+        for ([[maybe_unused]] auto _ : state) {
+            for (size_t i = (state.range(0)) * (state.threads() - 1); i--;) {
+                queue.enqueue( T{} );
+            }
+        }
+    } else {
+        for ([[maybe_unused]] auto _ : state) {
+            for (size_t i = state.range(0); i--;) {
+                queue.dequeue();
+            }
+        }
+    }
+
+    if (state.thread_index() == 0) {
+        queue.clear();
+    }
+}
+
 #define TEST_ON_TYPE(type) \
     BENCHMARK(BM_EnqueueDequeue< mtds::TwoMutexQueue<type> >)->Arg(1'000'000)->ThreadRange(1, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
     BENCHMARK(BM_EnqueueDequeue< mtds::MutexQueue<type> >)->Arg(1'000'000)->ThreadRange(1, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
@@ -83,12 +109,17 @@ template <typename Q, typename T = typename Q::value_type> void BM_EnqueueDequeu
     BENCHMARK(BM_EnqueueDequeueOnce< mtds::TwoMutexQueue<type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
     BENCHMARK(BM_EnqueueDequeueOnce< mtds::MutexQueue<type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
     BENCHMARK(BM_EnqueueDequeueOnce< mtds::MpscQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
-    BENCHMARK(BM_EnqueueDequeueOnce< mtds::MpmcQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();
+    BENCHMARK(BM_EnqueueDequeueOnce< mtds::MpmcQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
+    BENCHMARK(BM_EnqueueOnceDequeue< mtds::TwoMutexQueue<type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
+    BENCHMARK(BM_EnqueueOnceDequeue< mtds::MutexQueue<type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
+    BENCHMARK(BM_EnqueueOnceDequeue< mtds::MpscQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
+    BENCHMARK(BM_EnqueueOnceDequeue< mtds::MpmcQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();
 
 TEST_ON_TYPE(int);
 TEST_ON_TYPE(std::string);
 TEST_ON_TYPE(MyPair);
 
 // BENCHMARK(BM_EnqueueDequeueOnce< mtds::MpmcQueue <int> >)->Arg(1'000'000)->Threads(16)->Unit(benchmark::kMillisecond)->UseRealTime();
+// BENCHMARK(BM_EnqueueOnceDequeue< mtds::MutexQueue<std::string> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();
 
 BENCHMARK_MAIN();

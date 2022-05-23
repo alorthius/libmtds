@@ -22,8 +22,7 @@ public:
     TwoMutexQueue(const TwoMutexQueue&) = delete;
     TwoMutexQueue& operator=(const TwoMutexQueue&) = delete;
 
-    [[nodiscard]] bool empty() const { return m_size.load(std::memory_order_consume) == 0ul; }
-    [[nodiscard]] size_type size() const { return m_size.load(std::memory_order_consume); }
+    [[nodiscard]] bool empty();
 
     void clear() { while (try_dequeue().has_value()) continue; }
     template<typename U> void enqueue(U&& value);
@@ -38,9 +37,8 @@ public:
 private:
     struct Node {
         T value{};
-        Node* next_ptr = nullptr;
+        std::atomic<Node*> next_ptr = nullptr;
     };
-    std::atomic<size_type> m_size = 0;
     Node* m_head_ptr = nullptr;
     Node* m_tail_ptr = nullptr;
     std::mutex m_head_mutex{};
@@ -56,53 +54,67 @@ TwoMutexQueue<T>::TwoMutexQueue() {
 
 template<typename T>
 TwoMutexQueue<T>::~TwoMutexQueue() {
-    while (m_head_ptr) {
-        auto temp = m_head_ptr;
-        m_head_ptr = m_head_ptr->next_ptr;
+    while (auto temp = m_head_ptr) {
+        m_head_ptr = temp->next_ptr;
         delete temp;
     }
 }
 
 template<typename T>
+[[nodiscard]] bool TwoMutexQueue<T>::empty() {
+    bool ret;
+    {
+        std::lock_guard<std::mutex> lock{m_head_mutex};
+        ret = m_head_ptr->next_ptr.load() == nullptr;
+    }
+    return ret; 
+}
+
+template<typename T>
 template<typename U>
 void TwoMutexQueue<T>::enqueue(U&& value) {
+    auto temp = new Node{std::forward<U>(value)};
     {
-        std::lock_guard<std::mutex> lock{m_mutex};
-        m_size.fetch_add(1ul, std::memory_order_release);
-        auto temp = new Node{std::forward<U>(value)};
-        if (!m_head_ptr) {
-            m_head_ptr = m_tail_ptr = temp;
-        } else {
-            m_tail_ptr->next_ptr = temp;
-            m_tail_ptr = m_tail_ptr->next_ptr;
-        }
+        std::lock_guard<std::mutex> lock{m_tail_mutex};
+        m_tail_ptr->next_ptr.store(temp);
+        m_tail_ptr = temp;
     }
     m_cv_empty.notify_one();
 }
 
 template<typename T>
 T TwoMutexQueue<T>::dequeue() {
-    std::unique_lock<std::mutex> lock{m_mutex};
-    m_cv_empty.wait(lock, [this]{ return m_size.load(std::memory_order_consume) != 0ul; });
-    m_size.fetch_sub(1ul, std::memory_order_release);
-    auto value = std::move(m_head_ptr->value);
-    auto temp = m_head_ptr;
-    m_head_ptr = m_head_ptr->next_ptr;
-    delete temp;
+    T value;
+    {
+        std::unique_lock<std::mutex> lock{m_head_mutex};
+        auto node = m_head_ptr;
+        auto new_head = m_head_ptr->next_ptr.load();
+        while (new_head == nullptr) {
+            m_cv_empty.wait(lock);
+            node = m_head_ptr;
+            new_head = m_head_ptr->next_ptr.load();
+        }
+        value = std::move(new_head->value);
+        m_head_ptr = new_head;
+        delete node;
+    }
     return value;
 }
 
 template<typename T>
 std::optional<T> TwoMutexQueue<T>::try_dequeue() {
-    std::lock_guard<std::mutex> lock{m_mutex};
-    if (m_size.load(std::memory_order_consume) == 0ul) {
-        return {};
+    T value;
+    {
+        std::unique_lock<std::mutex> lock{m_head_mutex};
+        auto node = m_head_ptr;
+        auto new_head = m_head_ptr->next_ptr.load();
+        while (new_head == nullptr) {
+            return {};
+        }
+        value = std::move(new_head->value);
+        m_head_ptr = new_head;
+        delete node;
     }
-    m_size.fetch_sub(1ul, std::memory_order_release);
-    auto value = std::move(m_head_ptr->value);
-    auto temp = m_head_ptr;
-    m_head_ptr = m_head_ptr->next_ptr;
-    delete temp;
     return value;
 }
 
