@@ -17,7 +17,7 @@ public:
     using value_type = T;
     using size_type = size_t;
 
-    TwoMutexQueue() = default;
+    TwoMutexQueue();
     ~TwoMutexQueue();
     TwoMutexQueue(const TwoMutexQueue&) = delete;
     TwoMutexQueue& operator=(const TwoMutexQueue&) = delete;
@@ -43,9 +43,16 @@ private:
     std::atomic<size_type> m_size = 0;
     Node* m_head_ptr = nullptr;
     Node* m_tail_ptr = nullptr;
-    std::mutex m_mutex{};
+    std::mutex m_head_mutex{};
+    std::mutex m_tail_mutex{};
     std::condition_variable m_cv_empty{};
 };
+
+template<typename T>
+TwoMutexQueue<T>::TwoMutexQueue() {
+    auto dummy = new Node{};
+    m_head_ptr = m_tail_ptr = dummy;
+}
 
 template<typename T>
 TwoMutexQueue<T>::~TwoMutexQueue() {

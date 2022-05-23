@@ -69,10 +69,7 @@ void MpscQueue<T>::enqueue(U&& value) {
     tagged_ptr tail;
 
     while (true) {
-        tail = m_tail_ptr.load(std::memory_order_relaxed);
-
-        // Is tail consistent?
-        if (tail != m_tail_ptr.load(std::memory_order_acquire)) { continue; }
+        tail = m_tail_ptr.load(std::memory_order_acquire);
 
         auto next = tp::from_tagged_ptr<Node>(tail)->next_ptr.load(
                 std::memory_order_acquire);
