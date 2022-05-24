@@ -139,7 +139,7 @@ install(PROGRAMS
 # Tests
 foreach(target ${test_targets})
 	install(PROGRAMS
-			$<TARGET_FILE:${target}t>
+			$<TARGET_FILE:${target}>
 			DESTINATION bin)
 endforeach(target)
 
