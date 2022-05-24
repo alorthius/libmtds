@@ -51,7 +51,7 @@ TEST_F(MpmcQueueTest, ClearWorks) {
 }
 
 TEST_F(MpmcQueueTest, EnduranceTest) {
-    auto sum = endurance_test(c0, std::min(NUM_PRODUCERS, NUM_CONSUMERS), NUM_OPERATIONS);
+    auto sum = endurance_test(c0, NUM_PRODUCERS + NUM_CONSUMERS, NUM_OPERATIONS);
     EXPECT_EQ(sum, NUM_OPERATIONS);
 }
 
