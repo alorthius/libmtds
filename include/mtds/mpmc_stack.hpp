@@ -51,7 +51,7 @@ void MpmcStack<T, Backoff>::push(U &&value) {
 
     while (true) {
         new_node.ptr()->next_ptr.store( top, std::memory_order_relaxed );
-        if (m_top_ptr.compare_exchange_weak( top, TaggedPtr{new_node.ptr(), top.tag() + 1},
+        if (m_top_ptr.compare_exchange_weak( top, TaggedPtr{new_node.ptr(), (top.tag() + 1) % (1 << 14)},
                                              std::memory_order_release, std::memory_order_acquire )) {
             ++m_size;
             return;
@@ -74,7 +74,7 @@ std::optional<T> MpmcStack<T, Backoff>::try_pop() {
         auto next = top.ptr()->next_ptr.load(std::memory_order_relaxed);
 
         // Try to swing m_top_ptr to the next node
-        if (m_top_ptr.compare_exchange_weak(top, TaggedPtr{next.ptr(), top.tag() + 1},
+        if (m_top_ptr.compare_exchange_weak(top, TaggedPtr{next.ptr(), (top.tag() + 1) % (1 << 14)},
                                             std::memory_order_acquire, std::memory_order_relaxed)) {
             --m_size;
             auto value = top.ptr()->value;

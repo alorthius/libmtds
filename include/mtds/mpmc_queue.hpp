@@ -79,7 +79,7 @@ void MpmcQueue<T, Backoff>::enqueue(U&& value) {
         // Was m_tail_ptr pointing to the last node?
         if (next.ptr() != nullptr) {
             // Try to swing m_tail_ptr to the next node
-            m_tail_ptr.compare_exchange_weak( tail, TaggedPtr{next.ptr(), tail.tag() + 1},
+            m_tail_ptr.compare_exchange_weak( tail, TaggedPtr{next.ptr(), (tail.tag() + 1) % (1 << 14)},
                                               std::memory_order_release, std::memory_order_relaxed );
             continue;
         }
@@ -88,13 +88,13 @@ void MpmcQueue<T, Backoff>::enqueue(U&& value) {
         TaggedPtr tmp;
 
         // Try to link node at the end of the linked list
-        if (tail.ptr()->next_ptr.compare_exchange_strong(tmp, TaggedPtr{new_node.ptr(), next.tag() + 1},
+        if (tail.ptr()->next_ptr.compare_exchange_strong(tmp, TaggedPtr{new_node.ptr(), (next.tag() + 1) % (1 << 14)},
                                                          std::memory_order_release, std::memory_order_relaxed )) { break; }
 
         backoff();
     }
     // Enqueue is done. Try to swing tail to the inserted node
-    m_tail_ptr.compare_exchange_strong(tail, TaggedPtr{new_node.ptr(), tail.tag() + 1},
+    m_tail_ptr.compare_exchange_strong(tail, TaggedPtr{new_node.ptr(), (tail.tag() + 1) % (1 << 14)},
                                        std::memory_order_release, std::memory_order_relaxed );
     m_size.fetch_add(1, std::memory_order_relaxed);
 }
@@ -123,7 +123,7 @@ std::optional<T> MpmcQueue<T, Backoff>::try_dequeue() {
         // Is m_tail_ptr falling behind?
         if (head == tail) {
             m_tail_ptr.compare_exchange_strong(
-                    tail, TaggedPtr{next.ptr(), tail.tag() + 1},
+                    tail, TaggedPtr{next.ptr(), (tail.tag() + 1) % (1 << 14)},
                     std::memory_order_release, std::memory_order_relaxed);
             continue;
         }
@@ -132,7 +132,7 @@ std::optional<T> MpmcQueue<T, Backoff>::try_dequeue() {
 
         // Try to swing m_head_ptr to the next node
         if (m_head_ptr.compare_exchange_strong(
-                head, TaggedPtr{next.ptr(), head.tag() + 1},
+                head, TaggedPtr{next.ptr(), (head.tag() + 1) % (1 << 14)},
                 std::memory_order_release, std::memory_order_relaxed)) {
             break;
         }

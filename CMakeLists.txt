@@ -102,7 +102,8 @@ enable_testing()
 set(test_targets
 		mutex_queue_test
 		mpmc_queue_test
-		mpmc_stack_test)
+		mpmc_stack_test
+		tagged_ptr_test)
 
 foreach(target ${test_targets})
 	add_executable(${target} test/${target}.cpp)
@@ -134,6 +135,13 @@ install(PROGRAMS
 		$<TARGET_FILE:${PROJECT_NAME}>	# ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
 		$<TARGET_FILE:mtds_benchmark>
 		DESTINATION bin)
+
+# Tests
+foreach(target ${test_targets})
+	install(PROGRAMS
+			$<TARGET_FILE:${target}t>
+			DESTINATION bin)
+endforeach(target)
 
 # Define ALL_TARGETS variable to use in PVS and Sanitizers
 set(ALL_TARGETS ${PROJECT_NAME} ${test_targets})

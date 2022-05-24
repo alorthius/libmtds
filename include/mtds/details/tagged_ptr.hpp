@@ -4,7 +4,6 @@
 #ifndef MTDS_TAGGED_PTR_HPP
 #define MTDS_TAGGED_PTR_HPP
 
-#include <cmath>
 #include <stdexcept>
 
 #ifdef _MSC_VER
@@ -31,11 +30,11 @@ public:
     }
 
     FORCE_INLINE TaggedPtr(T* ptr, unsigned tag) {
-        if (tag >= std::pow(2, 14)) {  // Tag is 14-bit
+        if (tag >= 2 << 14) {  // Tag is 14-bit
             throw std::overflow_error{"Tag overflow"};
         }
         m_ptr = (0x000ffffffffffffc & reinterpret_cast<uintptr_t>(ptr))
-                | (0xfff0000000000003U & tag);
+                | ((0x3ffc & static_cast<unsigned long long>(tag)) << 50) | (0b11 & tag);
     }
 
     FORCE_INLINE T* ptr() {
