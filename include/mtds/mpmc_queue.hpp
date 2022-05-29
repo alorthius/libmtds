@@ -158,15 +158,10 @@ template<typename T, typename Backoff>
 bool MpmcQueue<T, Backoff>::empty() const {
     while (true) {
         auto head = m_head_ptr.load(std::memory_order_acquire);
+        auto next = head.ptr()->next_ptr.load(std::memory_order_acquire);
 
         // Is head consistent?
         if (head != m_head_ptr.load(std::memory_order_acquire)) {
-            continue;
-        }
-        auto next = head.ptr()->next_ptr.load(std::memory_order_relaxed);
-
-        // Is next consistent?
-        if (next != head.ptr()->next_ptr.load(std::memory_order_relaxed)) {
             continue;
         }
         return next.ptr() == nullptr;
