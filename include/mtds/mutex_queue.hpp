@@ -22,8 +22,8 @@ public:
     MutexQueue(const MutexQueue&) = delete;
     MutexQueue& operator=(const MutexQueue&) = delete;
 
-    [[nodiscard]] bool empty() const { return m_size.load(std::memory_order_consume) == 0ul; }
-    [[nodiscard]] size_type size() const { return m_size.load(std::memory_order_consume); }
+    [[nodiscard]] bool empty() const { return m_size.load(std::memory_order_acquire) == 0ul; }
+    [[nodiscard]] size_type size() const { return m_size.load(std::memory_order_acquire); }
 
     void clear() { while (try_dequeue().has_value()) continue; }
     template<typename U> void enqueue(U&& value);
@@ -78,7 +78,7 @@ T MutexQueue<T>::dequeue() {
     T value;
     {
         std::unique_lock<std::mutex> lock{m_mutex};
-        m_cv_empty.wait(lock, [this]{ return m_size.load(std::memory_order_consume) != 0ul; });
+        m_cv_empty.wait(lock, [this]{ return m_size.load(std::memory_order_acquire) != 0ul; });
         m_size.fetch_sub(1ul, std::memory_order_release);
         value = std::move(m_head_ptr->value);
         auto temp = m_head_ptr;
@@ -93,7 +93,7 @@ std::optional<T> MutexQueue<T>::try_dequeue() {
     T value;
     {
         std::lock_guard<std::mutex> lock{m_mutex};
-        if (m_size.load(std::memory_order_consume) == 0ul) {
+        if (m_size.load(std::memory_order_acquire) == 0ul) {
             return {};
         }
         m_size.fetch_sub(1ul, std::memory_order_release);

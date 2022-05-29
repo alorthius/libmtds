@@ -62,12 +62,8 @@ TwoMutexQueue<T>::~TwoMutexQueue() {
 
 template<typename T>
 [[nodiscard]] bool TwoMutexQueue<T>::empty() {
-    bool ret;
-    {
-        std::lock_guard<std::mutex> lock{m_head_mutex};
-        ret = m_head_ptr->next_ptr.load() == nullptr;
-    }
-    return ret; 
+    std::lock_guard<std::mutex> lock{m_head_mutex};
+    return m_head_ptr->next_ptr.load() == nullptr;
 }
 
 template<typename T>
