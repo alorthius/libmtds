@@ -8,7 +8,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-debug_build=true
+debug_build=false
 optimize_build=false
 remove_dirs=false
 install_prefix=".."

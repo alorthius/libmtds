@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 #! Check every comment after the "#!"
 
 #! CHANGE YOUR PROJECT NAME
-#  It is used as your project's main executable name. 
+#  It is used as your project's main executable name.
 set(LIB_NAME mtds)
 project(${LIB_NAME} C CXX)
 
@@ -61,7 +61,8 @@ set(detail_header_files
 set(header_files
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/ms_queue.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/treiber_stack.hpp
-		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mutex_queue.hpp)
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mutex_queue.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/two_mutex_queue.hpp)
 
 add_library(${LIB_NAME} INTERFACE)
 target_sources(${LIB_NAME} INTERFACE "$<BUILD_INTERFACE:${detail_header_files};${header_files}>")
@@ -83,6 +84,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 set(test_targets
+		two_mutex_queue_test
 		mutex_queue_test
 		ms_queue_test
 		treiber_stack_test
