@@ -1,43 +1,62 @@
-2022-04-27T14:13:30+01:00
-Running ./cmake-build-release/mtds_benchmark
-Run on (8 X 4900 MHz CPU s)
+Run on (4 X 2904 MHz CPU s)
 CPU Caches:
-  L1 Data 32 KiB (x4)
-  L1 Instruction 32 KiB (x4)
-  L2 Unified 256 KiB (x4)
-  L3 Unified 8192 KiB (x1)
-Load Average: 6.61, 4.88, 3.34
-***WARNING*** CPU scaling is enabled, the benchmark real time measurements may be noisy and will incur extra overhead.
----------------------------------------------------------------------------------------------------------------------------
-Benchmark                                                                                 Time             CPU   Iterations
----------------------------------------------------------------------------------------------------------------------------
-BM_EnqueueDequeue< mtds::MutexQueue<int> >/10000000/real_time/threads:1                 608 ms          608 ms            1
-BM_EnqueueDequeue< mtds::MutexQueue<int> >/10000000/real_time/threads:2                 515 ms         1028 ms            2
-BM_EnqueueDequeue< mtds::MutexQueue<int> >/10000000/real_time/threads:4                 246 ms          980 ms            4
-BM_EnqueueDequeue< mtds::MutexQueue<int> >/10000000/real_time/threads:8                 166 ms         1228 ms            8
-BM_EnqueueDequeue< mtds::MutexQueue<int> >/10000000/real_time/threads:16                184 ms         1749 ms           16
-BM_EnqueueDequeue< mtds::MpscQueue <int> >/10000000/real_time/threads:1                 800 ms          798 ms            1
-BM_EnqueueDequeue< mtds::MpmcQueue <int> >/10000000/real_time/threads:2                 338 ms          673 ms            2
-BM_EnqueueDequeue< mtds::MpmcQueue <int> >/10000000/real_time/threads:4                 231 ms          922 ms            4
-BM_EnqueueDequeue< mtds::MpmcQueue <int> >/10000000/real_time/threads:8                 184 ms         1221 ms            8
-BM_EnqueueDequeue< mtds::MpmcQueue <int> >/10000000/real_time/threads:16                174 ms         1260 ms           16
-BM_EnqueueDequeue< mtds::MutexQueue<std::string> >/10000000/real_time/threads:1        1484 ms         1477 ms            1
-BM_EnqueueDequeue< mtds::MutexQueue<std::string> >/10000000/real_time/threads:2         560 ms         1119 ms            2
-BM_EnqueueDequeue< mtds::MutexQueue<std::string> >/10000000/real_time/threads:4         356 ms         1418 ms            4
-BM_EnqueueDequeue< mtds::MutexQueue<std::string> >/10000000/real_time/threads:8         304 ms         2057 ms            8
-BM_EnqueueDequeue< mtds::MutexQueue<std::string> >/10000000/real_time/threads:16        297 ms         2243 ms           16
-BM_EnqueueDequeue< mtds::MpscQueue <std::string> >/10000000/real_time/threads:1         980 ms          977 ms            1
-BM_EnqueueDequeue< mtds::MpmcQueue <std::string> >/10000000/real_time/threads:2         445 ms          889 ms            2
-BM_EnqueueDequeue< mtds::MpmcQueue <std::string> >/10000000/real_time/threads:4         293 ms         1166 ms            4
-BM_EnqueueDequeue< mtds::MpmcQueue <std::string> >/10000000/real_time/threads:8         205 ms         1429 ms            8
-BM_EnqueueDequeue< mtds::MpmcQueue <std::string> >/10000000/real_time/threads:16        224 ms         1505 ms           16
-BM_EnqueueDequeue< mtds::MutexQueue<MyPair> >/10000000/real_time/threads:1             1211 ms         1207 ms            1
-BM_EnqueueDequeue< mtds::MutexQueue<MyPair> >/10000000/real_time/threads:2              493 ms          984 ms            2
-BM_EnqueueDequeue< mtds::MutexQueue<MyPair> >/10000000/real_time/threads:4              315 ms         1255 ms            4
-BM_EnqueueDequeue< mtds::MutexQueue<MyPair> >/10000000/real_time/threads:8              293 ms         1962 ms            8
-BM_EnqueueDequeue< mtds::MutexQueue<MyPair> >/10000000/real_time/threads:16             242 ms         1989 ms           16
-BM_EnqueueDequeue< mtds::MpscQueue <MyPair> >/10000000/real_time/threads:1              748 ms          747 ms            1
-BM_EnqueueDequeue< mtds::MpmcQueue <MyPair> >/10000000/real_time/threads:2              299 ms          597 ms            2
-BM_EnqueueDequeue< mtds::MpmcQueue <MyPair> >/10000000/real_time/threads:4              183 ms          728 ms            4
-BM_EnqueueDequeue< mtds::MpmcQueue <MyPair> >/10000000/real_time/threads:8              163 ms         1233 ms            8
-BM_EnqueueDequeue< mtds::MpmcQueue <MyPair> >/10000000/real_time/threads:16             152 ms         1245 ms           16
+  L1 Data 32 KiB (x2)
+  L1 Instruction 32 KiB (x2)
+  L2 Unified 256 KiB (x2)
+  L3 Unified 4096 KiB (x1)
+Load Average: 6.48, 3.63, 1.61
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Benchmark                                                                                                             Time             CPU   Iterations
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueDequeueTwoMutexQueueInt/1000000/real_time/threads:1                   295 ms          294 ms            4
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueDequeueTwoMutexQueueInt/1000000/real_time/threads:2                   332 ms          632 ms            2
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueDequeueTwoMutexQueueInt/1000000/real_time/threads:4                   451 ms         1556 ms            4
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueDequeueTwoMutexQueueInt/1000000/real_time/threads:8                   469 ms         1791 ms            8
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueDequeueTwoMutexQueueInt/1000000/real_time/threads:16                  508 ms         1977 ms           16
+QueueFixture<int, mtds::MsQueue>/EnqueueDequeueMsQueueInt/1000000/real_time/threads:1                               161 ms          161 ms            4
+QueueFixture<int, mtds::MsQueue>/EnqueueDequeueMsQueueInt/1000000/real_time/threads:2                               212 ms          423 ms            4
+QueueFixture<int, mtds::MsQueue>/EnqueueDequeueMsQueueInt/1000000/real_time/threads:4                               220 ms          879 ms            4
+QueueFixture<int, mtds::MsQueue>/EnqueueDequeueMsQueueInt/1000000/real_time/threads:8                               231 ms          944 ms            8
+QueueFixture<int, mtds::MsQueue>/EnqueueDequeueMsQueueInt/1000000/real_time/threads:16                              224 ms          914 ms           16
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueDequeueOnceTwoMutexQueueInt/1000000/real_time/threads:2              80.4 ms          161 ms            8
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueDequeueOnceTwoMutexQueueInt/1000000/real_time/threads:4               154 ms          594 ms            4
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueDequeueOnceTwoMutexQueueInt/1000000/real_time/threads:8               184 ms          746 ms            8
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueDequeueOnceTwoMutexQueueInt/1000000/real_time/threads:16              189 ms          789 ms           16
+QueueFixture<int, mtds::MsQueue>/EnqueueDequeueOnceMsQueueInt/1000000/real_time/threads:2                          54.9 ms          110 ms           12
+QueueFixture<int, mtds::MsQueue>/EnqueueDequeueOnceMsQueueInt/1000000/real_time/threads:4                          86.1 ms          342 ms            8
+QueueFixture<int, mtds::MsQueue>/EnqueueDequeueOnceMsQueueInt/1000000/real_time/threads:8                          82.4 ms          376 ms            8
+QueueFixture<int, mtds::MsQueue>/EnqueueDequeueOnceMsQueueInt/1000000/real_time/threads:16                         82.3 ms          400 ms           16
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueOnceDequeueTwoMutexQueueInt/1000000/real_time/threads:2              78.9 ms          155 ms           10
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueOnceDequeueTwoMutexQueueInt/1000000/real_time/threads:4               192 ms          679 ms            4
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueOnceDequeueTwoMutexQueueInt/1000000/real_time/threads:8               227 ms          884 ms            8
+QueueFixture<int, mtds::TwoMutexQueue>/EnqueueOnceDequeueTwoMutexQueueInt/1000000/real_time/threads:16              437 ms         1475 ms           16
+QueueFixture<int, mtds::MsQueue>/EnqueueOnceDequeueMsQueueInt/1000000/real_time/threads:2                           119 ms          235 ms            6
+QueueFixture<int, mtds::MsQueue>/EnqueueOnceDequeueMsQueueInt/1000000/real_time/threads:4                           278 ms          978 ms            4
+QueueFixture<int, mtds::MsQueue>/EnqueueOnceDequeueMsQueueInt/1000000/real_time/threads:8                           556 ms         2364 ms            8
+QueueFixture<int, mtds::MsQueue>/EnqueueOnceDequeueMsQueueInt/1000000/real_time/threads:16                          694 ms         3072 ms           16
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueDequeueTwoMutexQueueMyPair/1000000/real_time/threads:1             113 ms          112 ms            6
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueDequeueTwoMutexQueueMyPair/1000000/real_time/threads:2             349 ms          673 ms            2
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueDequeueTwoMutexQueueMyPair/1000000/real_time/threads:4             497 ms         1781 ms            4
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueDequeueTwoMutexQueueMyPair/1000000/real_time/threads:8             597 ms         2248 ms            8
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueDequeueTwoMutexQueueMyPair/1000000/real_time/threads:16            637 ms         1917 ms           16
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueDequeueMsQueueMyPair/1000000/real_time/threads:1                         401 ms          401 ms            3
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueDequeueMsQueueMyPair/1000000/real_time/threads:2                         430 ms          860 ms            2
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueDequeueMsQueueMyPair/1000000/real_time/threads:4                         320 ms         1278 ms            4
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueDequeueMsQueueMyPair/1000000/real_time/threads:8                         302 ms         1224 ms            8
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueDequeueMsQueueMyPair/1000000/real_time/threads:16                        280 ms         1012 ms           16
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueDequeueOnceTwoMutexQueueMyPair/1000000/real_time/threads:2         135 ms          267 ms            6
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueDequeueOnceTwoMutexQueueMyPair/1000000/real_time/threads:4         170 ms          532 ms            4
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueDequeueOnceTwoMutexQueueMyPair/1000000/real_time/threads:8         198 ms          715 ms            8
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueDequeueOnceTwoMutexQueueMyPair/1000000/real_time/threads:16        206 ms          854 ms           16
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueDequeueOnceMsQueueMyPair/1000000/real_time/threads:2                     179 ms          358 ms            4
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueDequeueOnceMsQueueMyPair/1000000/real_time/threads:4                     161 ms          643 ms            4
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueDequeueOnceMsQueueMyPair/1000000/real_time/threads:8                     140 ms          633 ms            8
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueDequeueOnceMsQueueMyPair/1000000/real_time/threads:16                   86.6 ms          427 ms           16
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueOnceDequeueTwoMutexQueueMyPair/1000000/real_time/threads:2        77.5 ms          155 ms           10
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueOnceDequeueTwoMutexQueueMyPair/1000000/real_time/threads:4         184 ms          654 ms            4
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueOnceDequeueTwoMutexQueueMyPair/1000000/real_time/threads:8         238 ms          926 ms            8
+QueueFixture<MyPair, mtds::TwoMutexQueue>/EnqueueOnceDequeueTwoMutexQueueMyPair/1000000/real_time/threads:16        398 ms         1445 ms           16
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueOnceDequeueMsQueueMyPair/1000000/real_time/threads:2                    52.2 ms          104 ms           12
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueOnceDequeueMsQueueMyPair/1000000/real_time/threads:4                     163 ms          650 ms            4
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueOnceDequeueMsQueueMyPair/1000000/real_time/threads:8                     370 ms         1527 ms            8
+QueueFixture<MyPair, mtds::MsQueue>/EnqueueOnceDequeueMsQueueMyPair/1000000/real_time/threads:16                    860 ms         3575 ms           16
