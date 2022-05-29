@@ -3,9 +3,8 @@
 
 #include <benchmark/benchmark.h>
 #include "mtds/two_mutex_queue.hpp"
-#include "mtds/mutex_queue.hpp"
-#include "mtds/mpmc_queue.hpp"
-#include "mtds/mpsc_queue.hpp"
+#include "mtds/ms_queue.hpp"
+#include "mtds/details/backoff.hpp"
 
 struct MyPair {
     int first;
@@ -103,23 +102,17 @@ template <typename Q, typename T = typename Q::value_type> void BM_EnqueueOnceDe
 
 #define TEST_ON_TYPE(type) \
     BENCHMARK(BM_EnqueueDequeue< mtds::TwoMutexQueue<type> >)->Arg(1'000'000)->ThreadRange(1, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
-    BENCHMARK(BM_EnqueueDequeue< mtds::MutexQueue<type> >)->Arg(1'000'000)->ThreadRange(1, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
-    BENCHMARK(BM_EnqueueDequeue< mtds::MpscQueue <type> >)->Arg(1'000'000)->Threads(1)->Unit(benchmark::kMillisecond)->UseRealTime();\
-    BENCHMARK(BM_EnqueueDequeue< mtds::MpmcQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
+    BENCHMARK(BM_EnqueueDequeue< mtds::MsQueue<type> >)->Arg(1'000'000)->ThreadRange(1, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
+    BENCHMARK(BM_EnqueueDequeue< mtds::MsQueue<type, mtds::backoff::yield_backoff> >)->Arg(1'000'000)->ThreadRange(1, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
     BENCHMARK(BM_EnqueueDequeueOnce< mtds::TwoMutexQueue<type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
-    BENCHMARK(BM_EnqueueDequeueOnce< mtds::MutexQueue<type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
-    BENCHMARK(BM_EnqueueDequeueOnce< mtds::MpscQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
-    BENCHMARK(BM_EnqueueDequeueOnce< mtds::MpmcQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
+    BENCHMARK(BM_EnqueueDequeueOnce< mtds::MsQueue<type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
+    BENCHMARK(BM_EnqueueDequeueOnce< mtds::MsQueue<type, mtds::backoff::yield_backoff> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
     BENCHMARK(BM_EnqueueOnceDequeue< mtds::TwoMutexQueue<type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
-    BENCHMARK(BM_EnqueueOnceDequeue< mtds::MutexQueue<type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
-    BENCHMARK(BM_EnqueueOnceDequeue< mtds::MpscQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
-    BENCHMARK(BM_EnqueueOnceDequeue< mtds::MpmcQueue <type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();
+    BENCHMARK(BM_EnqueueOnceDequeue< mtds::MsQueue<type> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();\
+    BENCHMARK(BM_EnqueueOnceDequeue< mtds::MsQueue<type, mtds::backoff::yield_backoff> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();
 
 TEST_ON_TYPE(int);
 TEST_ON_TYPE(std::string);
 TEST_ON_TYPE(MyPair);
-
-// BENCHMARK(BM_EnqueueDequeueOnce< mtds::MpmcQueue <int> >)->Arg(1'000'000)->Threads(16)->Unit(benchmark::kMillisecond)->UseRealTime();
-// BENCHMARK(BM_EnqueueOnceDequeue< mtds::MutexQueue<std::string> >)->Arg(1'000'000)->ThreadRange(2, 16)->Unit(benchmark::kMillisecond)->UseRealTime();
 
 BENCHMARK_MAIN();
