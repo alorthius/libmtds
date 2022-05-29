@@ -4,9 +4,8 @@ cmake_minimum_required(VERSION 3.15)
 
 #! CHANGE YOUR PROJECT NAME
 #  It is used as your project's main executable name. 
-set(PROJECT_NAME mtds_example)
 set(LIB_NAME mtds)
-project(${PROJECT_NAME} C CXX) # project(${PROJECT_NAME} C CXX ASM)
+project(${LIB_NAME} C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -64,25 +63,9 @@ set(header_files
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpmc_stack.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mutex_queue.hpp)
 
-#! Project main executable source compilation
-add_executable(${PROJECT_NAME} src/main.cpp)
-
-#! Put path to your project headers
-target_include_directories(${PROJECT_NAME} PRIVATE include/)
-
 add_library(${LIB_NAME} INTERFACE)
 target_sources(${LIB_NAME} INTERFACE "$<BUILD_INTERFACE:${detail_header_files};${header_files}>")
 target_include_directories(${LIB_NAME} INTERFACE include/)
-
-##########################################################
-
-target_link_libraries(${PROJECT_NAME} ${LIB_NAME})
-
-##########################################################
-
-#! Add external packages
-find_package(Threads REQUIRED)
-target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 ##########################################################
 # GoogleTest
@@ -112,7 +95,9 @@ foreach(target ${test_targets})
 endforeach(target)
 
 include(GoogleTest)
-gtest_discover_tests(${PROJECT_NAME})
+foreach(target ${test_targets})
+	gtest_discover_tests(${target})
+endforeach(target)
 
 ##########################################################
 # Benchmark
@@ -132,11 +117,9 @@ target_include_directories(mtds_benchmark PRIVATE benchmark include/)
 ##########################################################
 
 install(PROGRAMS
-		$<TARGET_FILE:${PROJECT_NAME}>	# ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
 		$<TARGET_FILE:mtds_benchmark>
 		DESTINATION bin)
 
-# Tests
 foreach(target ${test_targets})
 	install(PROGRAMS
 			$<TARGET_FILE:${target}>
@@ -144,7 +127,7 @@ foreach(target ${test_targets})
 endforeach(target)
 
 # Define ALL_TARGETS variable to use in PVS and Sanitizers
-set(ALL_TARGETS ${PROJECT_NAME} ${test_targets})
+set(ALL_TARGETS ${test_targets})
 
 # Include CMake setup
 include(cmake/main-config.cmake)
