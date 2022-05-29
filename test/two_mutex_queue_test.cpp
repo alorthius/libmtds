@@ -7,7 +7,7 @@
 
 constexpr size_t NUM_PRODUCERS = 4;
 constexpr size_t NUM_CONSUMERS = 4;
-constexpr size_t NUM_OPERATIONS = 1e4;
+constexpr size_t NUM_OPERATIONS = 1e5;
 
 class TwoMutexQueueTest : public ::testing::Test {
 protected:
@@ -48,7 +48,7 @@ TEST_F(TwoMutexQueueTest, ClearWorks) {
 }
 
 TEST_F(TwoMutexQueueTest, EnduranceTest) {
-    auto sum = endurance_test(c0, std::min(NUM_PRODUCERS, NUM_CONSUMERS), NUM_OPERATIONS);
+    auto sum = endurance_test(c0, NUM_PRODUCERS + NUM_CONSUMERS, NUM_OPERATIONS);
     EXPECT_EQ(sum, NUM_OPERATIONS);
 }
 
