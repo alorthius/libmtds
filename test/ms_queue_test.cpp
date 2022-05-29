@@ -3,13 +3,13 @@
 
 #include <gtest/gtest.h>
 #include "container_tests.hpp"
-#include "mtds/mpmc_queue.hpp"
+#include "mtds/ms_queue.hpp"
 
 constexpr size_t NUM_PRODUCERS = 4;
 constexpr size_t NUM_CONSUMERS = 4;
 constexpr size_t NUM_OPERATIONS = 1e5;
 
-class MpmcQueueTest : public ::testing::Test {
+class MsQueueTest : public ::testing::Test {
 protected:
     void SetUp() override {
         c1.push(1);
@@ -17,12 +17,12 @@ protected:
         c2.push(3);
     }
 
-    mtds::MpmcQueue<int> c0;
-    mtds::MpmcQueue<int> c1;
-    mtds::MpmcQueue<int> c2;
+    mtds::MsQueue<int> c0;
+    mtds::MsQueue<int> c1;
+    mtds::MsQueue<int> c2;
 };
 
-TEST_F(MpmcQueueTest, IsEmptyInitially) {
+TEST_F(MsQueueTest, IsEmptyInitially) {
     EXPECT_EQ(c0.size(), 0);
     EXPECT_TRUE(c0.empty());
 
@@ -30,7 +30,7 @@ TEST_F(MpmcQueueTest, IsEmptyInitially) {
     EXPECT_FALSE(c1.empty());
 }
 
-TEST_F(MpmcQueueTest, TryDequeueWorks) {
+TEST_F(MsQueueTest, TryDequeueWorks) {
     EXPECT_FALSE(c0.try_pop().has_value());
 
     auto value = c1.try_pop();
@@ -44,18 +44,18 @@ TEST_F(MpmcQueueTest, TryDequeueWorks) {
     EXPECT_EQ(c2.size(), 1);
 }
 
-TEST_F(MpmcQueueTest, ClearWorks) {
+TEST_F(MsQueueTest, ClearWorks) {
     c2.clear();
     EXPECT_EQ(c2.size(), 0);
     EXPECT_TRUE(c2.empty());
 }
 
-TEST_F(MpmcQueueTest, EnduranceTest) {
+TEST_F(MsQueueTest, EnduranceTest) {
     auto sum = endurance_test(c0, NUM_PRODUCERS + NUM_CONSUMERS, NUM_OPERATIONS);
     EXPECT_EQ(sum, NUM_OPERATIONS);
 }
 
-TEST_F(MpmcQueueTest, ProducerConsumerTest) {
+TEST_F(MsQueueTest, ProducerConsumerTest) {
     auto sum = producer_consumer_test(c0, NUM_PRODUCERS, NUM_CONSUMERS, NUM_OPERATIONS);
     EXPECT_EQ(sum, NUM_OPERATIONS);
 }

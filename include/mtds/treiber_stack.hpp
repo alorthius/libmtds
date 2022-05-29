@@ -1,8 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#ifndef MTDS_MPMC_STACK_HPP
-#define MTDS_MPMC_STACK_HPP
+#ifndef MTDS_TREIBER_STACK_HPP
+#define MTDS_TREIBER_STACK_HPP
 
 #include <atomic>
 #include <optional>
@@ -13,15 +13,15 @@
 namespace mtds {
 
 template<typename T, typename Backoff = backoff::exp_backoff>
-class MpmcStack {
+class TreiberStack {
 public:
     using value_type = T;
     using size_type = size_t;
 
-    MpmcStack() = default;
-    ~MpmcStack() { clear(); }
-    MpmcStack(const MpmcStack&) = delete;
-    MpmcStack& operator=(const MpmcStack&) = delete;
+    TreiberStack() = default;
+    ~TreiberStack() { clear(); }
+    TreiberStack(const TreiberStack&) = delete;
+    TreiberStack& operator=(const TreiberStack&) = delete;
 
     [[nodiscard]] bool empty() const {
         return m_top_ptr.load(std::memory_order_relaxed).ptr() == nullptr;
@@ -43,7 +43,7 @@ private:
 
 template<typename T, typename Backoff>
 template<typename U>
-void MpmcStack<T, Backoff>::push(U &&value) {
+void TreiberStack<T, Backoff>::push(U &&value) {
     Backoff backoff;
 
     TaggedPtr new_node{new Node{std::forward<U>(value)}};
@@ -61,7 +61,7 @@ void MpmcStack<T, Backoff>::push(U &&value) {
 }
 
 template<typename T, typename Backoff>
-std::optional<T> MpmcStack<T, Backoff>::try_pop() {
+std::optional<T> TreiberStack<T, Backoff>::try_pop() {
     Backoff backoff;
 
     while (true) {
@@ -86,7 +86,7 @@ std::optional<T> MpmcStack<T, Backoff>::try_pop() {
 }
 
 template<typename T, typename Backoff>
-T MpmcStack<T, Backoff>::pop() {
+T TreiberStack<T, Backoff>::pop() {
     std::optional<T> temp;
     do {
         temp = try_pop();
@@ -97,4 +97,4 @@ T MpmcStack<T, Backoff>::pop() {
 
 }  // namespace mtds
 
-#endif //MTDS_MPMC_STACK_HPP
+#endif //MTDS_TREIBER_STACK_HPP

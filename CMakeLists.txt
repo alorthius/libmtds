@@ -59,8 +59,8 @@ set(detail_header_files
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/details/backoff.hpp)
 
 set(header_files
-		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpmc_queue.hpp
-		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mpmc_stack.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/ms_queue.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/treiber_stack.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/include/mtds/mutex_queue.hpp)
 
 add_library(${LIB_NAME} INTERFACE)
@@ -84,8 +84,8 @@ enable_testing()
 
 set(test_targets
 		mutex_queue_test
-		mpmc_queue_test
-		mpmc_stack_test
+		ms_queue_test
+		treiber_stack_test
 		tagged_ptr_test)
 
 foreach(target ${test_targets})

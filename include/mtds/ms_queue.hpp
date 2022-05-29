@@ -1,8 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#ifndef MTDS_MPMC_QUEUE_HPP
-#define MTDS_MPMC_QUEUE_HPP
+#ifndef MTDS_MS_QUEUE_HPP
+#define MTDS_MS_QUEUE_HPP
 
 #include <atomic>
 #include <optional>
@@ -13,15 +13,15 @@
 namespace mtds {
 
 template<typename T, typename Backoff = backoff::exp_backoff>
-class MpmcQueue {
+class MsQueue {
 public:
     using value_type = T;
     using size_type = size_t;
 
-    MpmcQueue();
-    ~MpmcQueue();
-    MpmcQueue(const MpmcQueue&) = delete;
-    MpmcQueue& operator=(const MpmcQueue&) = delete;
+    MsQueue();
+    ~MsQueue();
+    MsQueue(const MsQueue&) = delete;
+    MsQueue& operator=(const MsQueue&) = delete;
 
     [[nodiscard]] bool empty() const;
     [[nodiscard]] size_type size() const { return m_size; }
@@ -46,7 +46,7 @@ private:
 };
 
 template<typename T, typename Backoff>
-MpmcQueue<T, Backoff>::MpmcQueue() {
+MsQueue<T, Backoff>::MsQueue() {
     TaggedPtr dummy_node{new Node{}};
 
     m_head_ptr.store(dummy_node, std::memory_order_release);
@@ -54,7 +54,7 @@ MpmcQueue<T, Backoff>::MpmcQueue() {
 }
 
 template<typename T, typename Backoff>
-MpmcQueue<T, Backoff>::~MpmcQueue() {
+MsQueue<T, Backoff>::~MsQueue() {
     clear();
 
     auto head = m_head_ptr.load(std::memory_order_relaxed);
@@ -66,7 +66,7 @@ MpmcQueue<T, Backoff>::~MpmcQueue() {
 
 template<typename T, typename Backoff>
 template<typename U>
-void MpmcQueue<T, Backoff>::enqueue(U&& value) {
+void MsQueue<T, Backoff>::enqueue(U&& value) {
     Backoff backoff;
 
     TaggedPtr new_node{new Node{std::forward<U>(value)}};
@@ -100,7 +100,7 @@ void MpmcQueue<T, Backoff>::enqueue(U&& value) {
 }
 
 template<typename T, typename Backoff>
-std::optional<T> MpmcQueue<T, Backoff>::try_dequeue() {
+std::optional<T> MsQueue<T, Backoff>::try_dequeue() {
     Backoff backoff;
 
     TaggedPtr head, next;
@@ -145,7 +145,7 @@ std::optional<T> MpmcQueue<T, Backoff>::try_dequeue() {
 }
 
 template<typename T, typename Backoff>
-T MpmcQueue<T, Backoff>::dequeue() {
+T MsQueue<T, Backoff>::dequeue() {
     std::optional<T> temp;
     do {
         temp = try_dequeue();
@@ -155,7 +155,7 @@ T MpmcQueue<T, Backoff>::dequeue() {
 }
 
 template<typename T, typename Backoff>
-bool MpmcQueue<T, Backoff>::empty() const {
+bool MsQueue<T, Backoff>::empty() const {
     while (true) {
         auto head = m_head_ptr.load(std::memory_order_acquire);
         auto next = head.ptr()->next_ptr.load(std::memory_order_acquire);
@@ -170,4 +170,4 @@ bool MpmcQueue<T, Backoff>::empty() const {
 
 }  // namespace mtds
 
-#endif //MTDS_MPMC_QUEUE_HPP
+#endif //MTDS_MS_QUEUE_HPP
